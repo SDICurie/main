@@ -61,6 +61,7 @@ typedef enum {
 	BASIC_ALGO_RAWDATA,
 	BASIC_ALGO_OHRM,
 	BASIC_ALGO_ALTITUDE,
+	BASIC_ALGO_KB,
 	BASIC_ALGO_DEMO,
 }basic_algo_type_t;
 

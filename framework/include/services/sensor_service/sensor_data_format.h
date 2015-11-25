@@ -63,6 +63,7 @@ typedef enum {
 	SENSOR_ABS_ACTIVITY,
 	SENSOR_ABS_STEPCADENCE,
 	SENSOR_ABS_OHRM,
+	SENSOR_ALGO_KB,
 	SENSOR_ALGO_DEMO,
 	SENSOR_ANY_MOTION,
 	SENSOR_NO_MOTION,
@@ -97,6 +98,7 @@ typedef enum {
 #define STEPCADENCE_TYPE_MASK       (1 << SENSOR_ABS_STEPCADENCE)
 #define OHRM_ABS_TYPE_MASK      (1 << SENSOR_ABS_OHRM)
 #define ALTITUDE_ABS_TYPE_MASK      (1 << SENSOR_ABS_ALTITUDE)
+#define ALGO_KB_MASK        (1 << SENSOR_ALGO_KB)
 #define ALGO_DEMO_MASK (1 << SENSOR_ALGO_DEMO)
 #define BOARD_SENSOR_MASK   (ACCEL_TYPE_MASK |	    \
 			     BARO_TYPE_MASK |	   \
@@ -113,6 +115,7 @@ typedef enum {
 			     STEPCADENCE_TYPE_MASK |	\
 			     ALTITUDE_ABS_TYPE_MASK |	 \
 			     OHRM_ABS_TYPE_MASK |      \
+			     ALGO_KB_MASK |	 \
 			     ALGO_DEMO_MASK)
 #define ANT_TYPE_MASK       (1 << ANT_SENSOR_TYPE_START)
 
@@ -307,5 +310,12 @@ struct ohrm_phy_data {
 	uint16_t adc_blind_value;
 } __packed;
 /** @} */
+
+/*
+ * Knowledge Builder Algorithm result structure
+ */
+typedef struct kb_result {
+	int16_t nClassLabel; /*!< recognition result of user defined gestures */
+}__packed kb_result_t;
 
 #endif /*__SENSOR_DATA_FORMAT_H__*/

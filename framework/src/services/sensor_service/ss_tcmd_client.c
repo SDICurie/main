@@ -79,7 +79,7 @@ static sensor_service_t sensor_handles[32];
 
 static cfw_service_conn_t *p_ss_service_conn = NULL;
 
-#define SENSOR_TYPE_NUM 11
+#define SENSOR_TYPE_NUM 12
 struct sensors {
 	char sensor_name[10];
 	uint8_t sensor_type;
@@ -95,6 +95,7 @@ struct sensors {
 	{ "BARO", SENSOR_BAROMETER },
 	{ "TEMP", SENSOR_TEMPERATURE },
 	{ "HUM", SENSOR_HUMIDITY },
+	{ "KB", SENSOR_ALGO_KB },
 };
 
 enum err_out_e {
@@ -253,6 +254,11 @@ static void sensor_test_handle_message(struct cfw_message *p_msg, void *p_param)
 				data;
 			SS_TCMD_LOG("%s=%d", sensors_info[10].sensor_name,
 				    (p_data->value));
+		} break;
+		case SENSOR_ALGO_KB:
+		{
+			kb_result_t *p = (kb_result_t *)p_data_header->data;
+			SS_TCMD_LOG("KB Algo class = %d\n", p->nClassLabel);
 		} break;
 		default:
 			err_out = ERR_SENSOR_EVENT;
