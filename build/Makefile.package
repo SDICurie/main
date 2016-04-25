@@ -161,14 +161,32 @@ endif
 $$($(1)_$(2)_LIB): $$($(1)_$(2)_OUT)/build/$(1).a
 	$$(AT)install -CD $$($(1)_$(2)_OUT)/build/$(1).a $$@
 
+# Create a .mk file that can be sourced to retrieve CFLAGS and LDFLAGS
+# required to link against the package
+$(PKG_OUT)/$(1)_$(2).mk:
+	@echo "Creating $(PKG_OUT)/$(1)_$(2).mk"
+	@mkdir -p $(PKG_OUT)
+	@rm -f $$@
+	@touch $$@
+	@for package in $$($(1)_DEPENDS); \
+	do \
+		echo "include $(PKG_OUT)/$$$${package}_$(2).mk" >> $$@; \
+		echo "$(1)_$(2)_CFLAGS += $$$$""($$$${package}_$(2)_CFLAGS)" >> $$@; \
+		echo "$(1)_$(2)_LDFLAGS += $$$$""($$$${package}_$(2)_LDFLAGS)" >> $$@; \
+	done
+	$$(AT)$$(foreach path,$$($(1)_$(2)_HEADERS_PATH),\
+		echo "$(1)_$(2)_CFLAGS += -I$$($(1)_THIS_DIR)/$$(path)" >> $$@;)
+	@echo "$(1)_$(2)_LDFLAGS += -L$$($(1)_$(2)_OUT)/lib -l:$(1)_$(2).a" >> $$@
+
 # Meta recipe to build the package
-$(1)_$(2): $$($(1)_$(2)_LIB)
+$(1)_$(2): $(PKG_OUT)/$(1)_$(2).mk $$($(1)_$(2)_LIB)
 
 # Clean recipe
 $(1)_$(2)_clean:: .force
 	@if [ -d $$($(1)_$(2)_OUT) ]; then \
 		echo $$(ANSI_RED)[pRM]$$(ANSI_OFF) $(1) for $(2) ; \
 		rm -rf $$($(1)_$(2)_OUT)                         ; \
+		rm -f $(PKG_OUT)/$(1)_$(2).mk; \
 	fi
 packages_clean: $(1)_$(2)_clean
 

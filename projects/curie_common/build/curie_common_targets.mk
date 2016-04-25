@@ -110,7 +110,7 @@ bootloader_GOALS = fsbl_menuconfig ssbl_menuconfig
 
 $(call generic_target,bootloader,$(BOOTLOADER_ROOT))
 
-bootloader: cos
+bootloader: cos cir_storage_x86
 
 override SOC_PATH := $(T)/bsp/src/machine/soc/intel/quark_se
 # Quark main
