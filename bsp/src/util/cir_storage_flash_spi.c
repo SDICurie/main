@@ -99,16 +99,14 @@ static int32_t spi_flash_0_read(cir_storage_flash_t *	storage,
 				uint32_t		data_size,
 				uint8_t *		data)
 {
-	uint32_t i;
 	unsigned int data_read_len;
 
-	for (i = 0; i < data_size; i++) {
-		if (spi_flash_read_byte(&pf_sba_device_flash_spi0.dev,
-					address + i,
-					1,
-					&data_read_len,
-					&data[i]) != DRV_RC_OK)
-			return -1;
+	if (spi_flash_read_byte(&pf_sba_device_flash_spi0.dev,
+				address,
+				data_size,
+				&data_read_len,
+				data) != DRV_RC_OK) {
+		return -1;
 	}
 
 	return 0;
