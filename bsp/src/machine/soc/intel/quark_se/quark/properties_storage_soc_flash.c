@@ -238,6 +238,7 @@ static bool init_read_write_offset_from_flash(flash_partition_t *part)
 	uint32_t min_used_block_header = 0xffffffff;
 	uint32_t max_used_block = 0;
 	uint32_t max_used_block_header = 0xffffffff;
+	uint32_t nb_unused_block = 0;
 
 	for (b = part->start_block;
 	     b < part->start_block + part->nb_blocks;
@@ -248,8 +249,10 @@ static bool init_read_write_offset_from_flash(flash_partition_t *part)
 						   &ret_len, &block_header);
 		if (ret != DRV_RC_OK || ret_len != 1)
 			return false;
-		if (block_header == UNUSED_BLOCK_HEADER)
+		if (block_header == UNUSED_BLOCK_HEADER) {
+			nb_unused_block++;
 			continue;
+		}
 		if (block_header < min_used_block_header) {
 			min_used_block_header = block_header;
 			min_used_block = b;
@@ -260,6 +263,13 @@ static bool init_read_write_offset_from_flash(flash_partition_t *part)
 			max_used_block = b;
 		}
 	}
+
+	/* The current implementation is designed so that at least one block
+	 * must be free at all time, i.e. it's header is equal to 0xffffffff.
+	 * If it's not the case at startup, this indicates a corrupted data and
+	 * the init fails, in turn causing a reformatting of the partition. */
+	if (nb_unused_block == 0)
+		return false;
 
 	/* Case of the yet unused partition */
 	if (min_used_block_header == UNUSED_BLOCK_HEADER &&
