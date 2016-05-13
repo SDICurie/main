@@ -127,6 +127,18 @@ void ble_start_app(T_QUEUE queue);
 int ble_app_conn_update(const struct bt_le_conn_param *p_params);
 
 /**
+ * Restore default BLE application connection parameters.
+ *
+ * This function should be called to restore the default connection parameters.
+ * It can be used in very specific scenarios, e.g. if you need specific
+ * tuning for the BLE connection for a while and once the work is over you could
+ * restore the default parameter.
+ *
+ * @return connection update return value, -1 if the connection is not ready.
+ */
+int ble_app_restore_default_conn(void);
+
+/**
  * Start advertisement reason.
  */
 enum ble_adv_reason {

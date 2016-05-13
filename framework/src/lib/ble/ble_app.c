@@ -884,3 +884,14 @@ int ble_app_set_device_name(const uint8_t *p_device_name, bool store)
 	}
 	return 0;
 }
+
+int ble_app_restore_default_conn(void)
+{
+	const struct bt_le_conn_param conn_params = {
+		MIN_CONN_INTERVAL, MAX_CONN_INTERVAL, SLAVE_LATENCY,
+		CONN_SUP_TIMEOUT
+	};
+
+	/* Send request to restore default connection */
+	return ble_app_conn_update(&conn_params);
+}
