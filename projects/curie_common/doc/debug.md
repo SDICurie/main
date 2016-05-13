@@ -2,26 +2,31 @@ Debug / Logs Display {#curie_debug}
 ====================
 
 ## Debug
-Support is only for Quark for now.
 
-Two ways : either using the console, or using IDE you wish.
+There are two ways to debug your application: either using the console, or using
+your favorite IDE.
 
-You can replace the ELF with app (firmware) below.
+### Debug from the console
 
+A debug_console_xx makefile target is provided to start a GDB server and
+connect a console client on it:
 
-### Start server and console client
+For debugging the Quark, type from the output directory:
 
-From the output directory:
+    make debug_console_qrk
 
-On Quark
+or for debugging the ARC:
 
-    make debug_console_qrk ELF=./firmware/quark.elf
+    make debug_console_arc
 
-On ARC
+In this later case, the program execution will stop for further debugging when
+entering the arc main() function.
 
-    make debug_console_arc ELF=./firmware/arc.elf
+You can also optionally replace the default ELF file with a custom one, e.g:
 
-### Start OpenOCD and GDB server
+    make debug_console_qrk ELF=path/to/curie_hello/firmware/ssbl_quark.elf
+
+### Debug from an IDE
 
 OpenOCD can be used to connect to the JTAG interface of the
 SoC to allow debugging. To do that you can type
@@ -30,12 +35,8 @@ SoC to allow debugging. To do that you can type
 
 That will launch the OpenOCD binary. You will then be able to connect to the different servers:
     - Telnet to localhost 4444 will connect to the OpenOCD shell
-    - ARC GDB to localhost 3333
-    - x86 GDB to localhost 3334
-
-From the output directory:
-
-    make debug_start ELF=./firmware/quark.elf
+    - ARC GDB to localhost 3334
+    - x86 GDB to localhost 3333
 
 ## Logs Display
 

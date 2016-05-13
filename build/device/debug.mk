@@ -65,12 +65,13 @@ debug_console_qrk: debug_start
 debug_console_arc: ELF := $(OUT)/firmware/arc.elf
 debug_console_arc: debug_start
 	$(AT)echo "path to ELF: $(ELF)"
-	@$(AT)echo $(ANSI_CYAN)CAVEAT: You should have compiled source with QUARK_SE_ARC_STARTUP_DISABLED option$(ANSI_OFF)
-	@$(AT)echo $(ANSI_CYAN)in order to debug ARC startup. While in GDB, type 'restart' to begin.$(ANSI_OFF)
 	$(AT)echo "target remote localhost:$(GDB_ARC_PORT_NUMBER)" > .gdbinit
 	$(AT)echo "monitor version" >> .gdbinit
 	$(AT)echo "monitor halt" >> .gdbinit
 	$(AT)echo "symbol-file $(ELF)" >> .gdbinit
+	$(AT)echo "source $(T)/projects/curie_common/build/config/debug/gdb_arc_ext.gdb" >> .gdbinit
+	@$(AT)echo $(ANSI_CYAN)Breakpoint was set in main, please wait...$(ANSI_OFF)
+	$(AT)echo "restart" >> .gdbinit
 	@# Make sure that we re-resume the target after quitting gdb
 	$(AT)echo "monitor resume" >> gdbdeinit
 	$(AT)echo "quit" >> gdbdeinit

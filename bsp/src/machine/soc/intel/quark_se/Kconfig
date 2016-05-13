@@ -98,15 +98,6 @@ config QUARK_SE_UPTIME
 		Provides an implementation for get_uptime_32k() and
 		get_uptime() for Quark SE platform.
 
-config QUARK_SE_ARC_STARTUP_DISABLED
-	bool "Debug ARC startup with GDB"
-	depends on QUARK_SE
-	help
-		In order to be able to debug ARC startup, you need to connect to it with gdb before
-		the core starts. Selecting this option will prevent Quark to start the ARC processor,
-		allowing the debugger to do that manually.
-		NOTE: this should only be done for debugging sessions when debugging ARC startup.
-
 menu "Memory mapping"
 
 config QUARK_SE_ARC_RAM_SIZE

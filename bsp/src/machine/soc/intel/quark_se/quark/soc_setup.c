@@ -275,16 +275,11 @@ void start_arc(unsigned int reset_vector)
 
 	local_task_sleep_ms(10);
 
-#ifndef CONFIG_QUARK_SE_ARC_STARTUP_DISABLED
 	/*
 	 * Next line starts ARC execution.
-	 * As we don't want to have the ARC running in debug mode,
-	 * we skip this instruction when the debug is enabled
-	 * on ARC startup.
 	 */
 	pr_debug(LOG_MODULE_QUARK_SE, "Start arc now");
 	SCSS_REG_VAL(SCSS_SS_CFG) |= ARC_RUN_REQ_A;
-#endif
 	local_task_sleep_ms(10);
 
 	pr_debug(LOG_MODULE_QUARK_SE, "ARC Core state: %p",

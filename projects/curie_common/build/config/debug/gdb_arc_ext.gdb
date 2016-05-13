@@ -1,5 +1,5 @@
 define restart
-	monitor targets 1
+	monitor targets 0
 	monitor reset halt
 
 	# Setting an access watchpoint in the
@@ -23,7 +23,7 @@ define restart
 
 	#setting ARC program counter to reset vector address
 	#and a hard breakpoint on main procedure.
-	monitor targets 0
+	monitor targets 1
 	monitor halt
 	delete
 	set $pc=__reset
