@@ -522,12 +522,12 @@ static void advertise_start(enum ble_adv_reason reason)
 	case BLE_ADV_STARTUP:
 		interval = CONFIG_BLE_ULTRA_FAST_ADV_INTERVAL;
 		if (get_boot_target() == TARGET_RECOVERY)
-			timeout = CONFIG_BLE_ADV_SLOW_TIMEOUT;
-		else
 			timeout = 0;
+		else
+			timeout = CONFIG_BLE_APP_DEFAULT_ADV_TIMEOUT;
 		break;
 	default:
-		interval = CONFIG_BLE_APP_DEFAULT_ADV_TIMEOUT;
+		interval = CONFIG_BLE_APP_DEFAULT_ADV_INTERVAL;
 		timeout = 0;
 		break;
 	}
