@@ -1,0 +1,48 @@
+menu "Sensors"
+
+config SERVICES_SENSOR
+	bool "Client"
+	select CFW
+
+config SERVICES_SENSOR_IMPL
+	bool "Server"
+	depends on BMI160
+	select CFW
+	select SERVICES_QUARK_SE_PROPERTIES
+	select SENSOR_CORE
+
+comment "The sensor server requires the BMI160 driver"
+	depends on !BMI160
+
+config SENSOR_CORE
+	bool
+
+config SERVICES_SENSOR_TCMD
+	bool "Sensor service Test Commands"
+	depends on SERVICES_SENSOR
+	depends on TCMD
+
+if SENSOR_CORE
+
+menu "Sensor Core Algorithms"
+
+config SENSOR_CORE_ALGO_UDG
+	bool "User Defined Gesture"
+	depends on PATTERN_MATCHING_DRV
+	depends on PACKAGE_MATHCONTEXT
+
+comment "The UDG algorithm requires the Pattern Matching driver"
+	depends on !PATTERN_MATCHING_DRV
+
+comment "The UDG algorithm requires the package Mathcontext"
+	depends on !PACKAGE_MATHCONTEXT
+
+config SENSOR_CORE_ALGO_DEMO
+	bool "Algo Demo"
+
+endmenu
+
+endif
+
+endmenu
+

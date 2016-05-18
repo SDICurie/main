@@ -1,0 +1,3 @@
+config SBA
+	bool
+	select CLK_SYSTEM

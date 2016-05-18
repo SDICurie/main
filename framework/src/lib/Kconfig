@@ -1,0 +1,1 @@
+source "framework/src/lib/ble/Kconfig"

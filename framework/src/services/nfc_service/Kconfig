@@ -1,0 +1,34 @@
+menu "NFC Service"
+
+config NFC_SERVICE
+	bool "NFC service interface"
+	depends on CFW
+
+config NFC_SERVICE_IMPL
+	bool "NFC service implementation"
+	depends on CFW
+
+config NFC_STN54_SUPPORT
+	bool "STN54x NFC chip support"
+	depends on NFC_STN54
+
+config NFC_STN54_FW_UPDATE
+	bool "Enable FW update"
+	depends on HAS_SPI_FLASH
+	depends on NFC_STN54_SUPPORT
+
+config NFC_STN54_DEBUG_RX_MESSAGE
+	bool "Print RX message information"
+	depends on NFC_STN54_SUPPORT
+
+config NFC_STN54_AMS_DEBUG_TCMD
+	bool "Enable booster/antenna tunning test commands"
+	depends on NFC_STN54_SUPPORT
+	depends on NFC_STN54_TCMD
+	depends on NFC_STN54_DEBUG_RX_MESSAGE
+
+config NFC_STN54_FSM_TCMD
+	bool "Enable FSM test commands"
+	depends on NFC_STN54_SUPPORT
+
+endmenu

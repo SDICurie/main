@@ -1,0 +1,16 @@
+menu "Low level storage"
+
+config SERVICES_QUARK_SE_LL_STORAGE
+	bool "Client"
+	select CFW
+
+config SERVICES_QUARK_SE_LL_STORAGE_IMPL
+	bool "Server"
+	depends on SOC_FLASH || SPI_FLASH
+	select CFW
+	depends on STORAGE_TASK
+
+comment "The LL storage service requires a SOC or SPI Flash driver and the storage task"
+	depends on (!SOC_FLASH && !SPI_FLASH) || !STORAGE_TASK
+
+endmenu

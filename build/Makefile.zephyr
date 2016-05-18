@@ -1,0 +1,147 @@
+# Copyright (c) 2016, Intel Corporation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+all:
+
+-include $(OUT)/.config
+
+ifeq ($(BUILDVARIANT),release)
+TARGET_CFLAGS += -DNDEBUG=1
+endif
+
+# Include recipe to create Kconfig file
+include $(T)/build/config.mk
+
+#
+# Packages dependencies solving
+#
+
+# Include rules to build packages
+include $(T)/build/Makefile.package
+
+#
+# Evaluate Make variables defined in .config to detect package dependencies
+#
+# E.g.:
+#
+# CONFIG_PACKAGE_FOO=y will be transformed into foo_ARCH prerequisite
+#
+TO_LOWER = $(shell echo $(1) | tr A-Z a-z)
+DEPENDS += $(call TO_LOWER, \
+	$(patsubst CONFIG_PACKAGE_%,%_$(ARCH), \
+		$(filter CONFIG_PACKAGE_%,$(.VARIABLES))))
+
+#
+# Add packages include paths to target C flags
+#
+TARGET_CFLAGS += $(foreach v,$(DEPENDS:%=%_INCLUDES),$($(v)))
+
+#
+# Add packages libraries to target linker flags
+#
+TARGET_LIBS += $(foreach v,$(DEPENDS:%=%_LIB),$($(v)))
+
+#
+# Zephyr build configuration
+#
+
+# Remove quotes from a variable
+define unquote
+$(patsubst "%",%,$(1))
+endef
+
+# If the path is a relative one, prefix with the Makefile directory
+define prefix_path
+$(if $(filter /%,$(1)),$(1),$(CURDIR)/$(1))
+endef
+
+# Evaluate some Zephyr base variables
+ZEPHYR_BASE  := $(T)/external/zephyr
+CONF_FILE    ?= $(call unquote,$(CONFIG_ZEPHYR_CONF_FILE))
+MDEF_FILE    := $(call unquote,$(CONFIG_OS_ZEPHYR_MDEF))
+ZEPHYR_BOARD := $(call unquote,$(CONFIG_ZEPHYR_BOARD))
+
+# We need to add the path to Zephyr board.h
+TARGET_CFLAGS += -I$(ZEPHYR_BASE)/boards/$(ZEPHYR_BOARD)/
+
+# We force our system to shout an error when there is a warning
+TARGET_CFLAGS += -Wall -Werror
+
+# Generate the Zephyr Makefile
+$(OUT)/Makefile: $(OUT)/.config
+	@echo "export ZEPHYR_BASE := $(ZEPHYR_BASE)" > $@
+	@echo "O := $(OUT)/zephyr" >> $@
+	@echo "ARCH := $(ARCH)" >> $@
+	@echo "KERNEL_TYPE := $(KERNEL_TYPE)" >> $@
+	@echo "CONF_FILE := $(call prefix_path,$(CONF_FILE))" >> $@
+	@echo "MDEF_FILE := $(call prefix_path,$(MDEF_FILE))" >> $@
+	@echo "export USE_CCACHE=0" >> $@
+	@echo "export EXTRA_LINKER_CMD_OPT := $(EXTRA_LINKER_CMD_OPT)" >> $@
+	@echo "override BOARD := $(ZEPHYR_BOARD)" >> $@
+	@echo "T := $(T)" >> $@
+	@echo "include $(T)/build/Makefile.toolchain" >> $@
+	@echo "TOOLCHAIN_LIBS = gcc" >> $@
+	@echo "LIB_INCLUDE_DIR_x86 = -L $$""(CROSS_COMPILE_DIR_x86)/lib/gcc/$$""(CROSS_COMPILE_TARGET_x86)/$$""{CROSS_COMPILE_x86_version}/" >> $@
+	@echo "LIB_INCLUDE_DIR_arc = -L $$""(CROSS_COMPILE_DIR_arc)/lib/gcc/$$""(CROSS_COMPILE_TARGET_arc)/$$""{CROSS_COMPILE_arc_version}/" >> $@
+	@echo "LIB_INCLUDE_DIR = $$""(LIB_INCLUDE_DIR_$$""(ARCH))" >> $@
+	@echo "override CFLAGS := \"$$""(CFLAGS)\"" >> $@
+	@echo "export LIB_INCLUDE_DIR CROSS_COMPILE TOOLCHAIN_LIBS CC AR" >> $@
+	@echo "include $(T)/external/zephyr/Makefile.inc" >> $@
+
+# Generate the Makefile.app that will be called by Zephyr
+$(OUT)/Makefile.app: $(OUT)/.config
+	@echo "OUT := $(OUT)" > $@
+	@echo "T := $(T)" >> $@
+	@echo "PROJECT_PATH := $(PROJECT_PATH)" >> $@
+	@echo "include $(OUT)/.config" >> $@
+	@echo "export KBUILD_ZEPHYR_APP := $(OUT)/libapp.a" >> $@
+	@echo "TARGET_CFLAGS := $(TARGET_CFLAGS)" >> $@
+	@echo "TARGET_LIBS := $(TARGET_LIBS)" >> $@
+	@echo "DEPENDS := $(DEPENDS)" >> $@
+	@echo "include $(T)/build/base.mk" >> $@
+
+# We need to generate a dummy source directory to please Zephyr
+$(OUT)/src/Makefile:
+	@mkdir -p $(OUT)/src
+	@echo "obj-y += dummy.o" > $(OUT)/src/Makefile
+	@touch $(OUT)/src/dummy.c
+
+all: $(OUT)/Makefile     \
+	 $(OUT)/Makefile.app \
+	 $(OUT)/src/Makefile \
+	 $(DEPENDS)
+	$(AT)$(MAKE) -C $(OUT)
+
+clean::
+	$(AT)if [ -f $(OUT)/Makefile ]; then  \
+		$(MAKE) -C $(OUT) clean;          \
+		rm -f $(OUT)/Makefile;            \
+		rm -f $(OUT)/Makefile.app;        \
+		rm -rf $(OUT)/src;                \
+		rm -rf $(OUT)/zephyr;             \
+	fi

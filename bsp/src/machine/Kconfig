@@ -1,0 +1,74 @@
+# The order of the definitions in this file is important, as it conditions
+# how values can be overridden:
+#
+# Board > SoC
+#
+
+# Board features
+config BOARD_PATH
+	string
+	option env="BOARD_PATH"
+
+-source "$BOARD_PATH/Kconfig"
+
+# SoC features
+config SOC_PATH
+	string
+	option env="SOC_PATH"
+
+-source "$SOC_PATH/Kconfig"
+
+# Architecture
+config ARCH
+	string
+	option env="ARCH"
+
+config HAS_FLOAT
+	bool
+
+config HAS_ARC
+	bool
+
+config HAS_QUARK
+	bool
+
+config HAS_BLE_CORE
+	bool
+
+choice
+	prompt "Core"
+	depends on HAS_ARC || HAS_QUARK || HAS_BLE_CORE
+
+config ARC
+	bool "ARC"
+	depends on HAS_ARC
+
+config QUARK
+	bool "Quark"
+	depends on HAS_QUARK
+
+config BLE_CORE
+	bool "BLE Core"
+	depends on HAS_BLE_CORE
+
+endchoice
+
+config BLE_LPM
+	bool "BLE Low Power Mode"
+	depends on BLE_CORE
+
+config CORE_NAME
+	string
+	default "arc" if ARC
+	default "quark" if QUARK
+	default "ble_core" if BLE_CORE
+
+config RECOVERY_BOOT_TARGET
+	bool
+	help
+		Mode to fallback when the main application mode is considered not
+		functional anymore.
+		It should be implemented by the board/application.
+
+comment "Define a proper Board Configuration to enable the Core menu"
+	depends on !HAS_ARC && !HAS_QUARK && !HAS_BLE_CORE

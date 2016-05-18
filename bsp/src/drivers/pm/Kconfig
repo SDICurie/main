@@ -1,0 +1,15 @@
+config HAS_USB_PM
+	bool
+
+config USB_PM
+	bool "USB cable detection driver"
+	depends on HAS_USB_PM
+	depends on SOC_COMPARATOR
+
+comment "USB_PM requires the SOC_COMPARATOR driver to be selected"
+	depends on !SOC_COMPARATOR
+
+config BLE_CORE_SUSPEND_BLOCKER_PM
+	bool "BLE Core suspend blocker driver"
+	depends on HAS_BLE_CORE
+	depends on SOC_GPIO_AON

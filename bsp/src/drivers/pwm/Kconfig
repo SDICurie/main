@@ -1,0 +1,9 @@
+config INTEL_QRK_PWM
+	bool "Intel Quark PWM driver"
+	select CLK_SYSTEM
+
+config TCMD_PWM
+	bool "PWM test command"
+	depends on INTEL_QRK_PWM
+	help
+	Enable or disable PWM test command

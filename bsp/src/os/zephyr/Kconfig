@@ -1,0 +1,27 @@
+if OS_ZEPHYR
+
+menu "Zephyr OS"
+
+config OS_ZEPHYR_MDEF
+	string "Main application configuration file"
+	default "main.mdef"
+
+config ZEPHYR_CONF_FILE
+        string "Zephyr configuration file path"
+        default "prj-Intel.conf"
+
+config ZEPHYR_BOARD
+	string "Name of the zephyr BOARD"
+	default "?"
+
+endmenu
+
+config QUEUE_ELEMENT_POOL_SIZE
+	int "Max queue elements for queues"
+	default 100
+
+config TIMER_POOL_SIZE
+	int "Max usable timers"
+	default 20
+
+endif

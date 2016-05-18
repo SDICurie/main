@@ -1,0 +1,3 @@
+config BLE_HRS_LIB
+	bool "BLE Heart Rate Service library"
+	default y if BLE_APP

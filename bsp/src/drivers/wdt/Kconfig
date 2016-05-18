@@ -1,0 +1,7 @@
+config WDT
+	bool
+
+config INTEL_QRK_WDT
+	bool "Intel Quark WDT driver"
+	select WDT
+	select CLK_SYSTEM

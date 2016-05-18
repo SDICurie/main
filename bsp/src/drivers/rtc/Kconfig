@@ -1,0 +1,15 @@
+config RTC
+	bool
+
+config INTEL_QRK_RTC
+	bool "Intel Quark RTC driver"
+	select RTC
+	select CLK_SYSTEM
+
+config INTEL_QRK_RTC_TCMD
+	bool "Intel Quark RTC Test commands"
+	depends on TCMD
+	depends on INTEL_QRK_RTC
+
+config INTEL_QRK_AON_PT
+	bool "Intel Quark Always ON Periodic Timer (AONPT) driver"

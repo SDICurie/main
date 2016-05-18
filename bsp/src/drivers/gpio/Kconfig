@@ -1,0 +1,24 @@
+config GPIO
+	bool
+
+config SOC_GPIO
+	bool "SOC GPIO Driver"
+	select GPIO
+
+if SOC_GPIO
+
+menu "SOC GPIO active banks"
+
+config SOC_GPIO_32
+	bool "GPIO 32"
+
+config SOC_GPIO_AON
+	bool "GPIO AON"
+
+endmenu
+
+endif
+
+config SS_GPIO
+	bool "GPIO SS driver"
+	select GPIO

@@ -1,0 +1,139 @@
+{
+ "flash" :  {
+  "commands" : [
+   {
+    "args" : "-a panic -U ${panic_file}",
+    "timeout" : 6000,
+    "retry" : 1,
+    "restrict" : null,
+    "tool" : "dfuDownloader",
+    "description": "Backup panic partition"
+   },
+   {
+    "args" : "-a panic -D ${panic_erase_file}",
+    "timeout" : 6000,
+    "retry" : 1,
+    "restrict" : null,
+    "tool" : "dfuDownloader",
+    "description": "Erase panic partition"
+   },
+   {
+    "args" : "-a log -U ${log_file}",
+    "timeout" : 120000,
+    "retry" : 1,
+    "mandatory" : false,
+    "restrict" : null,
+    "tool" : "dfuDownloader",
+    "description": "Backup log partition"
+   },
+   {
+    "args" : "-a sys_event -U ${events_file}",
+    "timeout" : 12000,
+    "retry" : 1,
+    "mandatory" : false,
+    "restrict" : null,
+    "tool" : "dfuDownloader",
+    "description": "Backup events partition"
+   },
+   {
+    "args" : "-a sys_event -D ${events_erase_file}",
+    "timeout" : 12000,
+    "retry" : 1,
+    "mandatory" : false,
+    "restrict" : null,
+    "tool" : "dfuDownloader",
+    "description": "Erase Events partition"
+   },
+   {
+    "args" : "-a ble_core -U ${ble_core_file}",
+    "timeout" : 20000,
+    "retry" : 1,
+    "restrict" : null,
+    "tool" : "dfuDownloader",
+    "description": "Backup ble_core partition"
+   },
+
+   {
+    "args" : "-a x86_rom -R -U ${otp_file}",
+    "timeout" : 3000,
+    "retry" : 1,
+    "restrict" : null,
+    "tool" : "dfuDownloader",
+    "description": "Backup otp partition"
+   },
+   {
+       "args" : "--url http://goto.intel.com/ndg_crash_upload --work-dir ${flashDir} --file ${panic_file} --file ${log_file} --file ${events_file} --file ${ble_core_file} --file ${otp_file} --json ${flashDir}/crash.json --org ndg --project curie_reference --type crash", "timeout" : 30000,
+       "timeout" : 30000,
+       "retry" : 2,
+       "mandatory" : false,
+       "restrict" : null,
+       "tool" : "eventUploader",
+       "description": "Upload panic and factory"
+   }
+
+  ],
+  "configurations" :   {
+   "usb" :    {
+    "brief" : "",
+    "default" : true,
+    "description" : "",
+    "documentation" : "http://goto.intel.com/flashtool",
+    "groupsState" :     {
+
+    },
+    "name" : "usb",
+    "platforms" : ["generic"],
+    "startState" : "pos"
+   }
+  },
+  "groups" :   {
+
+  },
+  "parameters" :   {
+   "panic_file" :    {
+    "description" : "Panic partition",
+    "name" : "panic",
+    "type" : "temporary_file",
+    "value" : "panic.bin"
+   },
+   "panic_erase_file" :    {
+    "description" : "Panic partition",
+    "name" : "panic",
+    "type" : "file",
+    "value" : "erase_panic.bin"
+   },
+   "events_file" :    {
+    "description" : "Events partition",
+    "name" : "events",
+    "type" : "temporary_file",
+    "value" : "history.bin"
+   },
+   "events_erase_file" :    {
+    "description" : "System Events partition",
+    "name" : "events",
+    "type" : "file",
+    "value" : "erase_events.bin"
+   },
+   "log_file" :    {
+    "description" : "Log partition",
+    "name" : "log",
+    "type" : "temporary_file",
+    "value" : "log.bin"
+   },
+   "ble_core_file" :    {
+    "description" : "ble_core partition",
+    "name" : "ble_core",
+    "type" : "temporary_file",
+    "value" : "ble_core.bin"
+   },
+   "otp_file" :    {
+    "description" : "otp partition",
+    "name" : "otp_partition",
+    "type" : "temporary_file",
+    "value" : "factory.bin"
+   }
+
+  },
+  "version" : "3.1"
+ }
+}

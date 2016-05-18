@@ -1,0 +1,14 @@
+config ADC
+	bool
+
+config SS_ADC
+	bool "Sensor Subsystem ADC driver"
+	depends on ARC
+	select ADC
+	select CLK_SYSTEM
+
+config TCMD_ADC
+       bool
+       default y
+       depends on SS_ADC
+       depends on TCMD

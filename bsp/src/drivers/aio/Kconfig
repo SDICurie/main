@@ -1,0 +1,14 @@
+config SOC_COMPARATOR
+	bool "SOC Comparator driver"
+
+config TCMD_COMPARATOR
+	bool "Comparator Test Command"
+	depends on TCMD
+	depends on SOC_COMPARATOR
+
+config MANAGED_COMPARATOR
+	bool "Managed Comparator driver"
+	depends on SOC_COMPARATOR
+
+comment "The managed comparator requires the soc comparator driver"
+	depends on !MANAGED_COMPARATOR

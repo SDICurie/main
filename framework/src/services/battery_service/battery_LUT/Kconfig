@@ -1,0 +1,29 @@
+
+menu "LUT"
+
+choice
+	prompt "Battery LUT"
+	default CUSTOM_LUT
+	depends on SERVICES_QUARK_SE_BATTERY_IMPL
+	help
+	Pick the LUT according to your hardware/battery specification.
+
+config CUSTOM_LUT
+	bool "LUT for Custom battery "
+
+config FG_LUT_P0469
+	bool "LUT for P0469LF battery "
+
+config FG_LUT_FC_SYNERGY2
+	bool "LUT for FCSYNERGY2 battery"
+
+config FG_LUT_B45MAH
+	bool "LUT for 45mAh Li-Lon battery"
+
+endchoice
+
+config VOLT_SHUTDOWN_THRESHOLD
+	int "Battery Volt shuthdown threshold"
+	default 3200
+
+endmenu

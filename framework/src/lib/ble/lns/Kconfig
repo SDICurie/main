@@ -1,0 +1,3 @@
+config BLE_LNS_LIB
+	bool "BLE Location and Navigation service library"
+	default y if BLE_APP

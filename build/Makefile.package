@@ -1,0 +1,252 @@
+# Copyright (c) 2016, Intel Corporation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+
+# =============================================================================
+# Provide the function template to create the rules to build packages.
+#
+# To add a new package, you will create a directory under packages, with this
+# structure:
+#
+#       packages
+#       |- package_name
+#          |- package.mk        Makefile containing the recipes to build
+#          |- Makefile          Package Makefile
+#
+# In package.mk you should first specify the list of paths where public headers
+# are located and then call the template that will allow to generate the
+# package. You can also specify the list of dependencies, if any.
+# Finally, you call the package_template with the package name and the list of
+# supported architectures. E.g:
+#
+#        package_name_DEPENDS = another_package yet_another_package
+#        package_name_HEADERS_PATH = path/to/include
+#        $(call generic_package,package_name, x86 arc)
+#
+# If no HEADERS_PATH is provided, "include" will be taken by default.
+#
+# In order to select an existing package, you will need to add the depends on
+# your project's Makefile, adding it to the <target>_DEPENDS E.g:
+#
+#        quark_DEPENDS += package_name
+#
+# The headers will be automatically available and functions can be called
+# directly from your project's code.
+#
+# Additional helpers are available to declare common package types:
+# - infra_package for packages that depends on SDK libraries
+# - zephyr package for packages that depends on Zephyr OS.
+#
+#
+# Packages need to know where they should be exported and where the includes
+# should be placed.
+PKG_OUT = $(OUT)/packages
+
+# Extend mrproper rule to delete all packages at once.
+mrproper::
+	@if [ -d $(PKG_OUT) ]; then \
+		echo $(ANSI_RED)[RM]$(ANSI_OFF) $(PKG_OUT); \
+		rm -rf $(PKG_OUT); \
+	fi
+
+.force:
+
+#
+# Packages function template
+#
+# First parameter is package name.
+# Second parameter is the space-separated list of supported architectures.
+#
+# Provide rules to generate the headers and libraries for all supported arch.
+#
+define package_arch_template
+
+# Calculate package output directory for the target architecture
+$(1)_$(2)_OUT = $(PKG_OUT)/$(1)_$(2)
+
+# Convert generic package dependencies to architecture specific dependencies
+$(1)_$(2)_DEPENDS = $$(patsubst %,%_$(2),$$($(1)_DEPENDS))
+# Define lib name based on package name and arch
+$(1)_$(2)_LIB = $$($(1)_$(2)_OUT)/lib/$(1)_$(2).a
+
+# Define headers path as package_name_HEADERS_PATH or take "include" by default
+$(1)_$(2)_HEADERS_PATH = $$(or $$($(1)_HEADERS_PATH),include)
+# Define package's include flags based on the headers path, and pointing to the
+# current directory
+$(1)_$(2)_INCLUDES = $$($(1)_$(2)_HEADERS_PATH:%=-I$$($(1)_THIS_DIR)/%)
+
+# Aggregate current package CFLAGS:
+# - Common packages flags
+# - Package includes
+# - Dependencies includes
+$(1)_$(2)_CFLAGS=$(CFLAGS)
+$(1)_$(2)_CFLAGS+=$$($(1)_CFLAGS)
+$(1)_$(2)_CFLAGS+=$$($(1)_$(2)_INCLUDES)
+$(1)_$(2)_CFLAGS+=$$(foreach v,$$($(1)_$(2)_DEPENDS),$$($$(v)_INCLUDES))
+
+# Check if Makefile is available in package directory. Determine current
+# directory to look for sources
+$(1)_THIS_DIR = $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+
+ifneq ($$(wildcard $$($(1)_THIS_DIR)/Makefile),)
+# Invoke package Makefile to build the archive
+$$($(1)_$(2)_OUT)/build/$(1).a: .force $$($(1)_$(2)_DEPENDS)
+	@echo $$(ANSI_CYAN)"Building $(1) for $(2)"$$(ANSI_OFF)
+	$$(AT)mkdir -p $$($(1)_$(2)_OUT)/build
+	$$(AT)CFLAGS='$$($(1)_$(2)_CFLAGS)' $$(MAKE) \
+		-f $(T)/build/cross-wrapper.mk -C $$($(1)_THIS_DIR) all \
+		OUT=$$($(1)_$(2)_OUT)/build \
+		ARCH=$(2)
+	@echo $$(ANSI_CYAN)"Done $(1) for $(2)"$$(ANSI_OFF)
+
+# Provide a target to create the binary version of the package. This will
+# prepare a stripped version of the library, and the package.mk specification,
+# then it will prepare a package_name_arch.tar.bz2 file that can be used for
+# binary deliveries.
+$(1)_$(2)_dist: $(1)_$(2)
+	@echo $$(ANSI_CYAN)"Creating $(1) binary package for $(2)"$$(ANSI_OFF)
+	$$(AT)rm -rf $$($(1)_$(2)_OUT)/dist $(PKG_OUT)/$(1)_$(2).tar*
+	$$(AT)mkdir -p $$($(1)_$(2)_OUT)/dist/$(1)
+	$$(AT)cp $$($(1)_$(2)_OUT)/build/$(1).a $$($(1)_$(2)_OUT)/dist/$(1)/$(1)_$(2).a
+	$$(AT)$$(AT)$$(MAKE) -f $(T)/build/cross-wrapper.mk \
+		strip \
+		ARGS="-d $$($(1)_$(2)_OUT)/dist/$(1)/$(1)_$(2).a" \
+		ARCH=$(2)
+	$$(AT)mkdir -p $$($(1)_$(2)_OUT)/dist/$(1)/
+	$$(AT)$$(foreach path,$$($(1)_$(2)_HEADERS_PATH),\
+		mkdir -p $$($(1)_$(2)_OUT)/dist/$(1)/$$(path); \
+		cp -rf $$($(1)_THIS_DIR)/$$(path)/* $$($(1)_$(2)_OUT)/dist/$(1)/$$(path); )
+	$$(AT)cp $$($(1)_THIS_DIR)/package.mk $$($(1)_$(2)_OUT)/dist/$(1)
+	$$(AT)tar cf $(PKG_OUT)/$(1)_$(2).tar -C $$($(1)_$(2)_OUT)/dist $(1)
+	$$(AT)bzip2 $(PKG_OUT)/$(1)_$(2).tar
+	@echo $$(ANSI_CYAN)"Done $(1) binary package for $(2)"$$(ANSI_OFF)
+$(1)_$(2)_clean:: .force
+	$$(AT)rm -rf $(PKG_OUT)/$(1)_$(2).tar.bz2
+else
+# The build directory contains the package library. Adding the dependencies, it
+# guarantees the dependency headers will be available when aggregating it in the
+# build form.
+$$($(1)_$(2)_OUT)/build/$(1).a: .force $$($(1)_THIS_DIR)/$(1)_$(2).a $$($(1)_$(2)_DEPENDS)
+	@echo $$(ANSI_CYAN)"Exporting $(1) library for $(2)"$$(ANSI_OFF)
+	$$(AT)install -CD $$($(1)_THIS_DIR)/$(1)_$(2).a $$@
+	@echo $$(ANSI_CYAN)"Done $(1) library"$$(ANSI_OFF)
+endif
+
+# Copy library to the lib directory with the expected name
+$$($(1)_$(2)_LIB): $$($(1)_$(2)_OUT)/build/$(1).a
+	$$(AT)install -CD $$($(1)_$(2)_OUT)/build/$(1).a $$@
+
+# Meta recipe to build the package
+$(1)_$(2): $$($(1)_$(2)_LIB)
+
+# Clean recipe
+$(1)_$(2)_clean:: .force
+	@if [ -d $$($(1)_$(2)_OUT) ]; then \
+		echo $$(ANSI_RED)[pRM]$$(ANSI_OFF) $(1) for $(2) ; \
+		rm -rf $$($(1)_$(2)_OUT)                         ; \
+	fi
+packages_clean: $(1)_$(2)_clean
+
+# Help recipe fragment
+help::
+	@echo " $(1)_$(2)       - build $(1) for $(2)"
+	@echo " $(1)_$(2)_clean - clean $(1) for $(2)"
+	@echo " $(1)_$(2)_dist  - create $(1) binary distribution for $(2)"
+endef
+
+TO_UPPER = $(shell echo $(1) | tr a-z A-Z)
+
+# This is a simple wrapper to the template, calling it for each arch.
+define generic_package_impl
+# Library recipes are architecture specific
+$(foreach arch,$(2),$(eval $(call package_arch_template,$(1),$(arch))))
+# Generate the <package>.Kconfig file
+# Note that package names are converted to upper case
+$(PKG_OUT)/$(1).Kconfig:
+	@mkdir -p $$(PKG_OUT)
+	@echo config $(call TO_UPPER,PACKAGE_$(1)) > $$@
+	@# The description will be either the package name, or the content of
+	@# the package_DESC variable stripped of the double quotes
+	@echo '	bool "$$(or $$(subst $$\",,$$($(1)_DESC)),$(1))"' >> $$@
+	@for package in $$(call TO_UPPER,$$($(1)_DEPENDS)); \
+	do \
+	echo "	select PACKAGE_$$$${package}" >> $$@; \
+	done;
+	@echo '	depends on n $$(foreach arch,$(2),||(ARCH="$$(arch)"))' >> $$@
+# Add the package Kconfig as a prerequisite to the global package Kconfig goal
+$(PKG_OUT)/Kconfig: $(PKG_OUT)/$(1).Kconfig
+endef
+
+$(PKG_OUT)/Kconfig:
+	@mkdir -p $(PKG_OUT)
+	@rm -rf $@
+	@for pkgconf in $^ ; \
+	do \
+	echo "source $${pkgconf}" >> $@; \
+	done;
+
+# Generic package function.
+# $(1) package name
+# $(2) supported architectures
+define generic_package
+$(eval $(call generic_package_impl,$(1),$(2)))
+endef
+
+define infra_package_impl
+$(1)_CFLAGS += -I$(T)/framework/include
+$(1)_CFLAGS += -I$(T)/bsp/include
+$(call generic_package,$(1),$(2))
+endef
+
+# Infra package function
+# $(1) package name
+# $(2) supported architectures
+define infra_package
+$(eval $(call infra_package_impl,$(1),$(2)))
+endef
+
+define zephyr_package_impl
+$(1)_CFLAGS += -I$(T)/external/zephyr/include
+$(call infra_package,$(1),$(2))
+endef
+
+# Zephyr package function
+# $(1) package name
+# $(2) supported architectures
+define zephyr_package
+$(eval $(call zephyr_package_impl,$(1),$(2)))
+endef
+
+# Recursive wildcard function.
+# $(1) the base directory
+# $(2) file name patterns to match
+rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
+
+# Search recursively package.mk files and include them
+PACKAGE_MK_FILES = $(call rwildcard, $(T)/packages, *package.mk)
+$(foreach mk,$(PACKAGE_MK_FILES), $(eval include $(mk)))

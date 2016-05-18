@@ -1,0 +1,7 @@
+config DISPLAY_HD44780
+	bool "HD44780 display driver"
+	depends on SOC_GPIO
+	depends on SOC_GPIO_32
+
+comment "HD44780 display driver requires SOC GPIO driver with GPIO 32 support"
+	depends on !SOC_GPIO || !SOC_GPIO_32

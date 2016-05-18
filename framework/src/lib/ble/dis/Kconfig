@@ -1,0 +1,8 @@
+config BLE_DIS_LIB
+	bool "BLE Device Info Service library"
+	default y if BLE_APP
+
+config BLE_DIS_SYSTEM_ID
+	bool "Include DIS system ID characteristic"
+	depends on BLE_DIS_LIB
+	default n

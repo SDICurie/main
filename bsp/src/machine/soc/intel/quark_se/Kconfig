@@ -1,0 +1,209 @@
+config CURIE
+	bool
+	default y
+	select QUARK_SE
+	select HAS_BLE_CORE
+	select HAS_BATTERY
+
+config QUARK_SE_DISABLE_INTERNAL_VREG
+	bool
+	default y
+	depends on CURIE
+
+config QUARK_SE_SWITCH_INTERNAL_OSCILLATOR
+	bool
+	default y
+	depends on CURIE
+
+config QUARK_SE
+	bool
+	select HAS_ARC
+	select HAS_QUARK
+
+# Hardware features supported by Quark SE based platforms
+
+# ARC | Quark
+config QUARK_SE_COMMON
+	bool
+	depends on QUARK_SE
+	default y if ARC || QUARK
+	select HAS_SHARED_MEM
+
+# ARC Only
+config QUARK_SE_ARC
+	bool
+	depends on QUARK_SE
+	default y if ARC
+	select HAS_USB_PM if CURIE
+	select HAS_FLOAT
+
+# Quark Only
+config QUARK_SE_QUARK
+	bool
+	depends on QUARK_SE
+	default y if QUARK
+	select HAS_USB_PM if CURIE
+	select HAS_USB
+	# Select appropriate driver if feature is selected
+	select USB_SHARED_INTERFACE if USB
+
+# BLE Core only
+config QUARK_SE_BLE_CORE
+	bool
+	depends on QUARK_SE
+	default y if BLE_CORE
+	select BLE_LPM
+
+menu "Quark SE"
+	depends on QUARK_SE
+
+choice
+	prompt "Panic implementation"
+
+config QUARK_SE_PANIC_DEFAULT
+	bool "Default"
+	help
+		Default implementation includes hardware exceptions and panic
+		propagation.
+
+config QUARK_SE_PANIC_CUSTOM
+	bool "Custom"
+	help
+		Selecting this allows an Quark SE based project to use a different
+		panic implementation.
+
+endchoice
+
+config QUARK_SE_PANIC_DEBUG
+	bool "Panic debug logs"
+	default y
+	depends on QUARK_SE_PANIC_DEFAULT
+	help
+		Parse and print panic dumps for ARC/QRK cores before reset.
+
+config QUARK_SE_USB_SETUP
+	bool "Quark SE specific USB initialization"
+	default y
+	depends on QUARK_SE
+	depends on USB
+	depends on SOC_GPIO_32
+	help
+		Provides USB platform initialization for Quark SE.
+
+config QUARK_SE_UPTIME
+	bool "Quark SE uptime implementation"
+	default y
+	depends on QUARK_SE
+	help
+		Provides an implementation for get_uptime_32k() and
+		get_uptime() for Quark SE platform.
+
+config QUARK_SE_ARC_STARTUP_DISABLED
+	bool "Debug ARC startup with GDB"
+	depends on QUARK_SE
+	help
+		In order to be able to debug ARC startup, you need to connect to it with gdb before
+		the core starts. Selecting this option will prevent Quark to start the ARC processor,
+		allowing the debugger to do that manually.
+		NOTE: this should only be done for debugging sessions when debugging ARC startup.
+
+menu "Memory mapping"
+
+config QUARK_SE_ARC_RAM_SIZE
+	hex "ARC RAM size in KiB"
+	default 24
+
+config QUARK_SE_ARC_DCCM_SIZE
+	hex "DCCM RAM size"
+	default 0x2000
+
+endmenu
+
+if QUARK_SE_QUARK
+menu "Quark SE Quark"
+
+config QUARK_SE_QUARK_LOG_BACKEND_UART
+	bool "Log over UART"
+	default y
+	depends on OS_ZEPHYR
+	depends on QUARK_SE_QUARK
+	help
+		When enabled logging can be over UART1.
+
+config QUARK_SE_PROPERTIES_STORAGE
+	bool "Properties storage implementation for Quark SE"
+	depends on SOC_FLASH
+	help
+		It is based on the internal Quark SE Flash
+
+comment "The property storage server requires the SoC Flash driver"
+	depends on !SOC_FLASH
+
+config QUARK_SE_QUARK_LOG_BACKEND_FLASH
+	bool "Log over SPI_FLASH"
+	default n
+	depends on QUARK_SE_QUARK
+	help
+		When enabled logging can be over SPI_FLASH.
+
+config QUARK_SE_QUARK_SOC_SETUP
+	bool "SoC Initialization for Quark on Zephyr"
+	default y
+	depends on OS_ZEPHYR
+	depends on QUARK_SE_QUARK
+	help
+		Provides SoC initialization.
+
+config QUARK_SE_QUARK_SOC_CONFIG
+	bool "SoC configuration for Quark"
+	default y
+	depends on QUARK_SE_QUARK
+	help
+		Device tree implementation as seen on Quark SE by Quark
+		core. Provides a function called init_all_devices() to
+		initialize the statically compiled device tree.
+
+config DEEPSLEEP
+	bool "Allow deep sleep in QUARK core"
+	depends on INTEL_QRK_AON_PT
+	depends on OS_ZEPHYR
+
+comment "QUARK core deepsleep requires the Intel AON PT driver"
+	depends on !INTEL_QRK_AON_PT
+
+config SPI_FLASH_SLAVE_CS
+	int
+	range 1 4
+	default 3
+
+endmenu
+endif
+
+if QUARK_SE_ARC
+menu "Quark SE Arc"
+
+config QUARK_SE_ARC_SOC_SETUP
+	bool "SoC Initialization for ARC on Zephyr"
+	default y
+	depends on OS_ZEPHYR
+	depends on QUARK_SE_ARC
+	help
+		Provides SoC initialization.
+
+config QUARK_SE_ARC_SOC_CONFIG
+	bool "SoC configuration for ARC"
+	default y
+	depends on QUARK_SE_ARC
+	help
+		Device tree implementation as seen on Quark SE by ARC core.
+		Provides a function called init_all_devices() to initialize the
+		statically compiled device tree.
+
+config DEEPSLEEP
+	bool "Allow deep sleep in ARC core"
+	depends on OS_ZEPHYR
+
+endmenu
+endif
+
+endmenu

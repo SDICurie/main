@@ -1,0 +1,153 @@
+
+menu "Battery"
+
+config SERVICES_QUARK_SE_BATTERY
+	bool "Client"
+	select CFW
+	select SERVICES_QUARK_SE_PROPERTIES
+
+config SERVICES_QUARK_SE_BATTERY_IMPL
+	bool "Server"
+	select CFW
+	depends on USB_PM
+	depends on HAS_BATTERY
+	depends on CHARGER
+	select BATTERY
+	select SERVICES_QUARK_SE_POWER_SUPPLY
+	select SERVICES_QUARK_SE_CHARGER
+	select SERVICES_QUARK_SE_FUELGAUGE
+
+comment "SERVICES_QUARK_SE_BATTERY_IMPL requires the USB cable detection driver"
+	depends on !USB_PM
+
+source "framework/src/services/battery_service/battery_LUT/Kconfig"
+
+menu "Software drivers"
+
+config SERVICES_QUARK_SE_CHARGER
+	bool "Charging Service"
+	select SERVICES_QUARK_SE_GPIO
+	depends on WORKQUEUE
+
+config CHARGER
+	bool "Charger feature"
+	help
+	Enable the Charger
+
+config QI_BQ51003
+	bool "QI charging driver for BQ51003"
+	depends on SERVICES_QUARK_SE_CHARGER
+	help
+	Enable the wireless charging feature for QI standard.
+
+config USB_POWER_SUPPLY
+	bool "USB charging driver"
+	depends on SERVICES_QUARK_SE_CHARGER
+	depends on USB_PM
+	depends on WORKQUEUE
+
+config SERVICES_QUARK_SE_FUELGAUGE
+	bool "Fuel gauge"
+	select SERVICES_QUARK_SE_ADC
+	select SERVICES_QUARK_SE_GPIO
+	select SERVICES_QUARK_SE_CHARGER
+
+config CH_SW_EOC
+	int "Software end of charge detection(minute)"
+	default 0
+	help
+	Manage end of charge detection by software / Put 0 to disable
+
+config SW_TEMP_MNG
+	bool "Software Temperature Management"
+	default n
+	help
+	Manage charger by system temperature
+
+config BATT_ADC_FACTOR
+	int "Battery ADC factor"
+	default 1
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config A_TEMP_ADC_FACTOR
+	int "Temperature ADC factor slope factor"
+	default 1
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config B_TEMP_ADC_FACTOR
+	int "Temperature ADC factor Y intercept factor"
+	default 1
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_USE_SS_GPIO
+	bool "Fuel gauge SS gpio usage"
+	default y
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_VOLT_LS_GPIO
+	int "GPIO number for FG voltage load switch pin"
+	default 14
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_TEMP_LS_GPIO
+	int "GPIO number for FG temperature load switch pin"
+	default 14
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_DFLT_VOLTAGE_PERIOD_MEASURE
+	int "(ms) Period to realize voltage measure / 1000min / 65000max"
+	default 30000
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_DFLT_TEMPERATURE_PERIOD_MEASURE
+	int "(ms) Period to realize voltage measure / 1000min / 65000max / 0 disable measure"
+	default 60000
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config CH_SW_EOC
+	int "(min) Time before sending the EOC from SOC=100% / 0 disable this feature"
+	default 0
+
+config FG_HYST_TEMP_THRESHOLD
+	int "(degree) Hysteresis temperature threshold"
+	default 5
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_HIGH_CHARGER_TEMP_THRESHOLD
+	int "(degree) High charger temperature threshold"
+	default 45
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+	help
+	Shutdown charger for this threshold value
+
+config FG_LOW_CHARGER_TEMP_THRESHOLD
+	int "(degree) Low charger temperature threshold"
+	default 0
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+	help
+	Shutdown charger for this threshold value
+
+config FG_DFLT_CRITICAL_ALARM_HIGH_TEMP
+	int "(degree) high temperature to send alarm"
+	default 55
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_DFLT_SHUTDOWN_ALARM_HIGH_TEMP
+	int "(degree) high temperature to initiate shutdown"
+	default 60
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_DFLT_CRITICAL_ALARM_LOW_TEMP
+	int "(degree) low temperature to send alarm"
+	default 0
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+config FG_DFLT_SHUTDOWN_ALARM_LOW_TEMP
+	int "(degree) low temperature to initiate shutdown"
+	default -5
+	depends on SERVICES_QUARK_SE_FUELGAUGE
+
+endmenu
+
+endmenu
+

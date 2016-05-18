@@ -1,0 +1,13 @@
+config BLE_RSCS_LIB
+	bool "BLE Running Speed and Cadence service library"
+	default y if BLE_APP
+
+config BLE_RSCS_SENSOR_LOCATION_SUPPORT
+	bool "BLE Running Speed and Cadence Sensor Location Support"
+	depends on BLE_RSCS_LIB
+	default y if BLE_RSCS_LIB
+
+config BLE_RSCS_MULTIPLE_SENSOR_LOCATION_SUPPORT
+	bool "BLE Running Speed and Cadence Multiple Sensor Location Support"
+	depends on BLE_RSCS_SENSOR_LOCATION_SUPPORT
+	default y if BLE_RSCS_SENSOR_LOCATION_SUPPORT

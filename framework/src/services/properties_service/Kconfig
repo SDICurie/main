@@ -1,0 +1,21 @@
+menu "Properties"
+
+config SERVICES_QUARK_SE_PROPERTIES
+	bool "Client"
+	select CFW
+
+config SERVICES_QUARK_SE_PROPERTIES_IMPL
+	bool "Server"
+	select CFW
+	depends on STORAGE_TASK
+	depends on QUARK_SE_PROPERTIES_STORAGE
+
+comment "The Properties service requires the property storage library and the storage task"
+	depends on !QUARK_SE_PROPERTIES_STORAGE || !STORAGE_TASK
+
+config TCMD_SERVICES_QUARK_SE_PROPERTIES
+	bool "Test command"
+	depends on TCMD
+	depends on SERVICES_QUARK_SE_PROPERTIES_IMPL
+
+endmenu

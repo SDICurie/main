@@ -1,0 +1,46 @@
+menu "Utility libraries"
+
+config WORKQUEUE
+	bool "An OS agnostic workqueue implementation"
+
+config ZEPHYR_WORKQUEUE_TASK_STACKSIZE
+	int "Stacksize of the workqueue task"
+	default 1024
+	depends on WORKQUEUE
+
+config CUNIT_TESTS
+	bool "Unit Tests Utils"
+
+menu "Flash circular storage"
+	depends on SPI_FLASH
+
+config CSTORAGE_FLASH_SPI
+	bool "SPI Flash circular storage"
+	depends on SPI_FLASH
+	select PACKAGE_CIR_STORAGE
+
+config PROFILING
+	bool "add -finstrument-functions"
+
+endmenu
+
+comment "The FLASH circular storage requires a SPI Flash driver"
+	depends on !SPI_FLASH
+
+config MEMORY_POOLS_BALLOC
+	bool "Use memory pool-based balloc implementation"
+
+config MEMORY_POOLS_BALLOC_STATISTICS
+	bool "Collect balloc usage statistics"
+	help
+	Collect balloc usage statistics and add a test command to display them
+
+config MEMORY_POOLS_BALLOC_TRACK_OWNER
+	bool "Tracks memory block owners"
+	depends on MEMORY_POOLS_BALLOC_STATISTICS
+
+config DBG_POOL_TCMD
+       bool "Dbg pool Test commands"
+       depends on TCMD
+
+endmenu

@@ -1,0 +1,46 @@
+menu "BLE Service"
+
+config SERVICES_BLE
+	bool "BLE CFW based service APIs"
+	select CFW
+	select BLUETOOTH_PERIPHERAL
+
+config SERVICES_BLE_IMPL
+	bool "BLE CFW base service implementation"
+	select CFW
+	select BLUETOOTH_PERIPHERAL
+	select BLUETOOTH_SMP
+
+config SERVICES_BLE_GATTC
+	bool "BLE GATT Client APIs"
+	select BLUETOOTH_GATT_CLIENT
+
+config SERVICES_BLE_STORAGE
+	bool "Use properties storage to store ble nv data"
+	depends on SERVICES_BLE_IMPL
+	depends on SERVICES_QUARK_SE_PROPERTIES
+	default y if SERVICES_QUARK_SE_PROPERTIES
+
+config SERVICES_BLE_CENTRAL
+	bool "BLE CFW based central role APIs"
+	depends on SERVICES_BLE
+
+menuconfig RPC
+	bool "RPC support"
+	default y
+	depends on IPC_UART_NS16550 || BLE_CORE
+
+comment "The BLE core RPC mechanism on the quark requires the UART NS16550 driver"
+	depends on !IPC_UART_NS16550
+
+config RPC_OUT
+	bool "Issues RPC requests"
+	default y
+	depends on RPC
+
+config RPC_IN
+	bool "Implements RPC requests"
+	default y
+	depends on RPC
+
+endmenu

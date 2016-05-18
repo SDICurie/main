@@ -1,0 +1,15 @@
+menu "Analog Digital Converter"
+
+config SERVICES_QUARK_SE_ADC
+	bool "Client"
+	select CFW
+
+config SERVICES_QUARK_SE_ADC_IMPL
+	bool "Server"
+	depends on ADC
+	select CFW
+
+comment "The ADC server requires an ADC driver"
+	depends on !ADC
+
+endmenu

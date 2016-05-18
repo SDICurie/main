@@ -1,0 +1,3 @@
+config BLE_BAS_LIB
+	bool "BLE Battery service library"
+	default y if BLE_APP

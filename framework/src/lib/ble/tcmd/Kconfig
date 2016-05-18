@@ -1,0 +1,15 @@
+config TCMD_BLE
+	bool "BLE test commands"
+	depends on TCMD
+	depends on SERVICES_BLE
+	default y if SERVICES_BLE
+
+config TCMD_BLE_DTM
+	bool "BLE DTM test commands"
+	depends on TCMD_BLE
+	default y if TCMD_BLE
+
+config TCMD_BLE_DEBUG
+	bool "BLE debug test commands"
+	depends on TCMD_BLE
+

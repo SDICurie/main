@@ -1,0 +1,19 @@
+menu "Haptic"
+
+config HAPTIC
+	bool
+
+config DRV2605
+	bool "DRV2605 Haptic driver"
+	depends on INTEL_QRK_I2C
+	select HAPTIC
+
+config DRV2605_TCMD
+	bool "DRV2605 test commands"
+	depends on DRV2605
+	select HAPTIC
+
+comment "DRV2605 Haptic driver requires the Intel I2C bus driver"
+	depends on !INTEL_QRK_I2C
+
+endmenu

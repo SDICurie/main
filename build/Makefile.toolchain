@@ -1,0 +1,47 @@
+TOOLCHAIN_DIR ?= $(T)/external/toolchain
+ifeq ($(wildcard $(TOOLCHAIN_DIR)/tools/compiler),)
+$(info No toolchain found under [$(TOOLCHAIN_DIR)].)
+$(info Please go to https://github.com/01org/curie-bsp/releases/ to download it.)
+$(info Please specify the toolchain path using the TOOLCHAIN_DIR environment variable.)
+$(error )
+endif
+
+# x86
+CROSS_COMPILE_TARGET_x86 = i586-intel-elfiamcu
+CROSS_COMPILE_x86_version = 5.2.1
+CROSS_COMPILE_DIR_x86 = $(TOOLCHAIN_DIR)/tools/compiler/gcc-ia/$(CROSS_COMPILE_x86_version)
+CROSS_COMPILE_x86=$(CROSS_COMPILE_DIR_x86)/bin/$(CROSS_COMPILE_TARGET_x86)-
+CFLAGS_x86 += -isystem \
+	$(CROSS_COMPILE_DIR_x86)/lib/gcc/$(CROSS_COMPILE_TARGET_x86)/$(CROSS_COMPILE_x86_version)/include
+
+# arc
+CROSS_COMPILE_TARGET_arc = arc-elf32
+CROSS_COMPILE_arc_version = 4.8.5
+CROSS_COMPILE_DIR_arc = $(TOOLCHAIN_DIR)/tools/compiler/gcc-arc/$(CROSS_COMPILE_arc_version)
+CROSS_COMPILE_arc=$(CROSS_COMPILE_DIR_arc)/bin/${CROSS_COMPILE_TARGET_arc}-
+CFLAGS_arc += -isystem \
+	$(CROSS_COMPILE_DIR_arc)/lib/gcc/$(CROSS_COMPILE_TARGET_arc)/$(CROSS_COMPILE_arc_version)/include
+CFLAGS_arc += -mcpu=arcem -mdiv-rem -mbarrel-shifter -mspfp -mdpfp
+
+CFLAGS += -I$(T)/external/zephyr/lib/libc/minimal/include/
+CFLAGS += -D_UNSUPPORTED_STD_LIBS -nostdlib -nostartfiles -nostdinc
+CFLAGS += -Wall -Os -fshort-enums -g -fdata-sections -ffunction-sections
+CFLAGS += $(CFLAGS_$(ARCH))
+
+CROSS_COMPILE = $(CROSS_COMPILE_$(ARCH))
+
+# Make variables (CC, etc...)
+AS              = $(CROSS_COMPILE)as
+LD              = $(CROSS_COMPILE)ld
+CC              = $(CROSS_COMPILE)gcc
+CPP             = $(CC) -E
+AR              = $(CROSS_COMPILE)ar
+NM              = $(CROSS_COMPILE)nm
+STRIP           = $(CROSS_COMPILE)strip
+OBJCOPY         = $(CROSS_COMPILE)objcopy
+OBJDUMP         = $(CROSS_COMPILE)objdump
+
+
+OPENOCD = $(TOOLCHAIN_DIR)/tools/debugger/openocd/bin/openocd
+GDB_ARC = $(TOOLCHAIN_DIR)/tools/debugger/gdb-arc/bin/gdb-arc
+GDB_QRK = $(TOOLCHAIN_DIR)/tools/debugger/gdb-ia/bin/gdb-ia

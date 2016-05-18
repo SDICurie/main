@@ -1,0 +1,50 @@
+config BLE_APP
+	bool "BLE Reference application implementation"
+	depends on CFW
+	depends on SERVICES_BLE
+	depends on SERVICES_BLE_IMPL
+	depends on IPC_UART_NS16550
+	depends on SERVICES_QUARK_SE_PROPERTIES
+
+config BLE_APP_DEFAULT_ADV_INTERVAL
+	int "Default advertisement interval in units of 0.625ms"
+	default 160
+
+config BLE_APP_DEFAULT_ADV_TIMEOUT
+	int "Default advertisement timeout in seconds"
+	default 180
+
+config BLE_ADV_SLOW_INTERVAL
+	int "Slow advertisement interval in units of 0.625ms"
+	default 2056
+
+config BLE_ADV_SLOW_TIMEOUT
+	int "Slow advertisement timeout in seconds"
+	default 0
+
+config BLE_ULTRA_FAST_ADV_INTERVAL
+	int "Ultra fast advertisement interval in units of 0.625ms"
+	default 48
+
+config BLE_ADV_FAST_TIMEOUT
+	int "Fast advertisement timeout in seconds"
+	default 30
+
+config BLE_TX_POWER
+	int "Transmission power in units of dBm"
+	default 0
+	range -40 +4
+
+config BLE_APP_USE_BAT
+	bool "Use battery service to update battery level"
+	depends on BLE_APP
+	depends on SERVICES_QUARK_SE_BATTERY
+	default y if SERVICES_QUARK_SE_BATTERY
+
+source "framework/src/lib/ble/bas/Kconfig"
+source "framework/src/lib/ble/dis/Kconfig"
+source "framework/src/lib/ble/gap/Kconfig"
+source "framework/src/lib/ble/hrs/Kconfig"
+source "framework/src/lib/ble/lns/Kconfig"
+source "framework/src/lib/ble/rscs/Kconfig"
+source "framework/src/lib/ble/tcmd/Kconfig"

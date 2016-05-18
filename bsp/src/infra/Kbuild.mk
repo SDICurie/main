@@ -1,0 +1,23 @@
+obj-$(CONFIG_IPC) += ipc_callback.o
+obj-y += panic.o
+obj-$(CONFIG_LOG_CBUFFER) += log_impl_cbuffer.o
+obj-$(CONFIG_LOG_PRINTK)  += log_impl_printk.o
+obj-$(CONFIG_LOG_PRINTF)  += log_impl_printf.o
+obj-$(CONFIG_TCMD) += tcmd/
+obj-y += log_tcmd.o
+obj-y += panic_tcmd.o
+obj-$(CONFIG_FACTORY_DATA) += factory_data.o
+obj-$(CONFIG_FACTORY_DATA_WRITE) += factory_data_write.o
+obj-$(CONFIG_FACTORY_TESTS) +=  factory.o
+obj-y += log.o
+obj-y += log_impl.o
+obj-$(CONFIG_VERSION) += version.o
+obj-y += port.o
+obj-$(CONFIG_CONSOLE_MANAGER)  += console_manager.o
+obj-$(CONFIG_CONSOLE_BACKEND_UART)     += console_backend_uart.o
+obj-$(CONFIG_CONSOLE_BACKEND_USB_ACM)  += console_backend_usb_acm.o
+obj-$(CONFIG_SYSTEM_EVENTS) += system_events.o
+obj-$(CONFIG_CONSOLE_BACKEND_FLASH)     += console_backend_flash.o
+obj-$(CONFIG_INTEL_QRK_WDT) += wdt_helper.o
+cflags-$(CONFIG_PROFILING) += -finstrument-functions -finstrument-functions-exclude-file-list=wdt_helper.c
+obj-y += xloop.o

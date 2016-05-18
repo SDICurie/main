@@ -1,0 +1,21 @@
+config SPI
+	bool
+
+config INTEL_QRK_SPI
+	bool "Intel Quark SPI driver"
+	select SPI
+	select SBA
+	select CLK_SYSTEM
+
+config SS_SPI
+	bool "SS SPI driver"
+	select SPI
+	select SBA
+	select CLK_SYSTEM
+
+config TCMD_SPI
+       bool
+       default y
+       depends on SBA
+       depends on TCMD
+       depends on SPI

@@ -1,0 +1,13 @@
+config IPC_UART_NS16550
+	bool "UART NS16550 IPC link driver"
+	depends on UART_NS16550
+	depends on SOC_GPIO && SOC_GPIO_32
+	depends on OS_ZEPHYR
+
+comment "The BLE core IPC link requires the UART driver and the SOC GPIO driver with GPIO 32 support"
+	depends on !SOC_GPIO || !SOC_GPIO_32 || !UART_NS16550
+
+config IPC_UART_BAUDRATE
+	int "IPC UART Baudrate"
+	default 115200
+	depends on IPC_UART_NS16550 || BLE_CORE

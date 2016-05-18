@@ -1,0 +1,50 @@
+menu "LED"
+
+config LED
+	bool
+
+config LED_MULTICOLOR
+	bool
+
+config SOC_LED
+	bool "SOC Led driver"
+	depends on INTEL_QRK_PWM
+	select LED
+
+comment "SOC Led driver requires the Intel PWM driver"
+	depends on !INTEL_QRK_PWM
+
+config LP5562_LED
+	bool "LP5562 Led driver"
+	depends on INTEL_QRK_I2C
+	select LED
+	select SBA
+	select LED_MULTICOLOR
+
+comment "LP5562 Led driver requires the Intel I2C bus driver"
+	depends on !INTEL_QRK_I2C
+
+config LP5562_LED_ENABLE
+	bool
+	depends on LP_5562_LED
+	help
+	This flag is set by boards that have the GPIO led enable wired
+
+config LED_WAVE_SUPPORT
+	bool "Led wave support"
+	depends on LP5562_LED
+
+choice
+       depends on LP5562_LED
+       prompt "LP5562 LED type"
+       config LP_5562_LED_C113
+       bool "C113"
+       config LP_5562_LED_C115
+       bool "C115"
+       config LP_5562_LED_LX404
+       bool "LX404"
+       config LP_5562_LED_SMLP34
+       bool "SMLP34"
+endchoice
+
+endmenu

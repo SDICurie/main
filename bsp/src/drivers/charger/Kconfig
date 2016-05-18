@@ -1,0 +1,36 @@
+menu "Charger"
+
+choice
+	prompt "Charger"
+	default BQ25101H
+	depends on SERVICES_QUARK_SE_CHARGER
+	help
+	Pick the Charger driver according to your hardware/battery specification.
+
+config BQ25101H
+	bool "BQ25101H charger"
+	depends on MANAGED_COMPARATOR
+	help
+	Enable internal Curie v2 charger driver.
+
+config BQ25120
+	bool "BQ25120 charger"
+	select DRV_EOC_NOTIF_CAPA
+	select DRV_FAULT_NOTIF_CAPA
+	depends on INTEL_QRK_I2C
+	depends on MANAGED_COMPARATOR
+	help
+	Enable BQ25120 charger driver.
+endchoice
+
+config DRV_EOC_NOTIF_CAPA
+	bool "Driver end of charge notification capability"
+	help
+	Flag for charger driver capability
+
+config DRV_FAULT_NOTIF_CAPA
+	bool "Driver fault notification capability"
+	help
+	Flag for charger driver capability
+
+endmenu

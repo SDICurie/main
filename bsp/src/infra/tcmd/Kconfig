@@ -1,0 +1,48 @@
+menuconfig TCMD
+	bool "Test Commands"
+	help
+	Test Commands allow specific features of the target to be tested by sending
+	ASCII formatted buffers on a communication interface like UART.
+
+if TCMD
+
+config TCMD_ASYNC
+	bool "Asynchronous Mode"
+	help
+	Asynchronous Test Command support based on basic messaging.
+
+config TCMD_CONSOLE_USB_ACM
+	bool "Test commands on CDC_ACM"
+	depends on USB_ACM
+
+config TCMD_CONSOLE_UART
+	bool "UART test command console"
+	default y
+	depends on UART
+	help
+	Provides support to enter test commands on UART console
+
+config TCMD_CONSOLE
+	bool "Basic console client"
+	select TCMD_ASYNC
+
+choice
+	prompt "Master/Slave"
+	optional
+
+config TCMD_MASTER
+	bool "Master"
+	select TCMD_ASYNC
+	select IPC
+	help
+	Master Mode allows a node to dispatch Test Commands to slave nodes.
+
+config TCMD_SLAVE
+	bool "Slave"
+	select TCMD_ASYNC
+	help
+	Slave Mode allows a node to handle Test Commands received on a master node.
+
+endchoice
+
+endif

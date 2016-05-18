@@ -1,0 +1,67 @@
+mainmenu "Curie BSP build configuration"
+
+config PROJECT_PATH
+	string
+	option env="PROJECT_PATH"
+
+
+menu "Project"
+
+-source "$PROJECT_PATH/project.Kconfig"
+
+endmenu
+
+menu "Services"
+
+source "framework/src/services/Kconfig"
+-source "$PROJECT_PATH/services.Kconfig"
+
+endmenu
+
+menu "Packages"
+
+config PKG_OUT
+	string
+	option env="PKG_OUT"
+
+-source "packages/*/*/package.Kconfig"
+-source "packages/*/*/*/package.Kconfig"
+-source "$PKG_OUT/Kconfig"
+
+endmenu
+
+menu "Advanced Settings"
+
+source "bsp/Kconfig"
+
+source "framework/Kconfig"
+
+endmenu
+
+menu "Debug Settings"
+
+config OS_UNIT_TESTS
+	bool "OS Unit Tests"
+	help
+		Caution when selecting this option, as it will dramatically
+		increase the output binary size.
+
+config QUARK_DRIVER_TESTS
+	bool "Quark driver tests"
+
+config ARC_DRIVER_TESTS
+	bool "Arc driver tests"
+
+config ARC_OS_UNIT_TESTS
+	bool "Arc OS unit tests"
+
+config FACTORY_TESTS
+	bool "Factory tests"
+
+config GPIO_DRIVER_TESTS
+	depends on GPIO
+	depends on QUARK_DRIVER_TESTS || ARC_DRIVER_TESTS
+	default y
+	bool "GPIO driver tests"
+
+endmenu

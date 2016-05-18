@@ -1,0 +1,44 @@
+menu "User Interface"
+
+config UI_SERVICE_IMPL
+	bool "UI service implementation"
+	depends on HAPTIC || LED || BUTTON
+	select CFW
+
+comment "The UI service requires at least a Led, Haptic or Button driver"
+	depends on !HAPTIC && !LED && !BUTTON
+
+config UI_SERVICE_IMPL_BUTTON
+	bool "Button support"
+	default y
+	depends on BUTTON
+	depends on UI_SERVICE_IMPL
+
+config UI_SERVICE_IMPL_LED
+	bool "LED support"
+	default y
+	depends on LED
+	depends on UI_SERVICE_IMPL
+
+config UI_SERVICE_IMPL_HAPTIC
+	bool "Haptic support"
+	default y
+	depends on HAPTIC
+	depends on UI_SERVICE_IMPL
+
+comment "Select a driver to add Haptic support"
+	depends on !HAPTIC
+
+config TCMD_UI_SVC
+	bool "UI Service Test Command"
+	depends on TCMD
+	depends on UI_SERVICE_IMPL
+
+config UI_SERVICE
+	bool "UI service interface"
+	select CFW
+
+source "framework/src/lib/button/Kconfig"
+source "framework/src/lib/led/Kconfig"
+
+endmenu

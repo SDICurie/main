@@ -1,0 +1,13 @@
+menuconfig CFW
+	bool "Component Framework for services"
+	select IPC
+	select CFW_CLIENT
+	select CFW_SERVICE
+
+if CFW
+
+source "framework/src/cfw/Kconfig"
+source "framework/src/tcmd/Kconfig"
+source "framework/src/lib/Kconfig"
+
+endif

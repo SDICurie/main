@@ -1,0 +1,69 @@
+config NFC_STN54
+	bool "STN54 NFC chip on Intel QRK"
+	depends on INTEL_QRK_I2C
+	depends on SBA
+	depends on I2C
+
+config NFC_COMPARATOR_IRQ
+	bool "Use comparator for IRQ_OUT interrupt"
+	default y
+	depends on NFC_STN54
+	depends on SOC_COMPARATOR
+
+menu "STN54 driver config"
+	depends on NFC_STN54
+
+	config STN54_I2C_ADDR
+		hex "I2C address"
+		default 0x08
+
+	choice
+		prompt "I2C bus"
+
+	config NFC_STN54_ON_I2C0
+		bool "I2C0"
+
+	config NFC_STN54_ON_I2C1
+		bool "I2C1"
+
+	endchoice
+
+	config STN54_RST_PIN
+		int "Reset pin"
+		default 15
+
+	config STN54_IRQ_OUT_PIN
+		int "IRQ_OUT pin"
+		default 2
+
+	config STN54_HAS_PWR_EN
+		bool "STN54 has power enable pin"
+		default n
+
+	config STN54_PWR_EN_PIN
+		int "Power enable pin"
+		default 19
+		depends on STN54_HAS_PWR_EN
+
+	config STN54_HAS_BOOSTER
+		bool "STN54E uses AS39230 RF booster chip"
+		default n
+
+	config STN54_BOOSTER_RST_PIN
+		int "RF booster reset pin"
+		default 18
+		depends on STN54_HAS_BOOSTER
+
+	config NFC_FW_MAJOR_VERSION
+		hex "NFC firmware Major version"
+		default 0x06
+
+	config NFC_FW_MINOR_VERSION
+		hex "NFC firmware Minor version"
+		default 0x12
+
+endmenu
+
+config NFC_STN54_TCMD
+	bool "STN54 NFC test commands"
+	depends on NFC_STN54

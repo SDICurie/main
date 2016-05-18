@@ -1,0 +1,16 @@
+menu "Circular storage"
+
+config SERVICES_QUARK_SE_CIRCULAR_STORAGE
+	bool "Client"
+	select CFW
+
+config SERVICES_QUARK_SE_CIRCULAR_STORAGE_IMPL
+	bool "Server"
+	select CFW
+	depends on CSTORAGE_FLASH_SPI
+	depends on STORAGE_TASK
+
+comment "The Circular Storage service requires the Flash SPI circular storage library and the storage task"
+	depends on !CSTORAGE_FLASH_SPI || !STORAGE_TASK
+
+endmenu

@@ -1,0 +1,26 @@
+source "framework/src/services/ble_service/Kconfig"
+source "framework/src/services/circular_storage_service/Kconfig"
+source "framework/src/services/ui_service/Kconfig"
+source "framework/src/services/nfc_service/Kconfig"
+source "framework/src/services/test_service/Kconfig"
+source "framework/src/services/battery_service/Kconfig"
+source "framework/src/services/gpio_service/Kconfig"
+source "framework/src/services/adc_service/Kconfig"
+source "framework/src/services/ll_storage_service/Kconfig"
+source "framework/src/services/properties_service/Kconfig"
+source "framework/src/services/sensor_service/Kconfig"
+
+comment "*"
+
+menu Extras
+
+config STORAGE_TASK
+	bool "Storage Task"
+	help
+	The storage task is a low priority task dedicated to the asynchronous
+	handling of blocking flash operations.
+
+config AUTO_SERVICE_INIT
+	bool "Activate the auto initialization of enabled services"
+
+endmenu

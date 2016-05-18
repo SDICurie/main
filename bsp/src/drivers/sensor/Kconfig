@@ -1,0 +1,189 @@
+config SENSOR_BUS_COMMON
+	bool
+
+menuconfig BMI160
+	bool "BMI160 sensor driver"
+	depends on SS_SPI || SS_I2C
+	select SBA
+	select SENSOR_BUS_COMMON
+	select WORKQUEUE
+
+if BMI160
+
+	choice
+		prompt "Communication bus"
+
+		config BMI160_I2C
+			bool "I2C"
+			depends on SS_I2C
+
+		config BMI160_SPI
+			bool "SPI"
+			depends on SS_SPI
+
+	endchoice
+
+	config BMM150
+		bool "BMM150 compass sensor driver"
+		help
+			Enable BMM150 support in BMI160 driver since BMM150 is supposed to
+			connect to BMI160 and be managed by it.
+
+	config BMI160_ANY_MOTION
+		bool "Enable bmi160 chip any motion detection"
+		default y
+
+	config BMI160_ANY_MOTION_ONESHOT
+		bool "Disable any motion detection after it detected"
+		depends on BMI160_ANY_MOTION
+		default y
+
+	config BMI160_NO_MOTION
+		bool "Enable bmi160 chip no motion detection"
+		default y
+
+	config BMI160_NO_MOTION_ONESHOT
+		bool "Disable no motion detection after it detected"
+		depends on BMI160_NO_MOTION
+		default y
+
+	config BMI160_ENABLE_ANYMOTION_AFTER_NOMOTION
+		bool "Enable any motion detection after no motion detected"
+		depends on BMI160_NO_MOTION
+		depends on BMI160_ANY_MOTION
+		default y
+
+	config BMI160_ENABLE_NOMOTION_AFTER_ANYMOTION
+		bool "Enable no motion detection after any motion detected"
+		depends on BMI160_NO_MOTION
+		depends on BMI160_ANY_MOTION
+		default y
+
+	config BMI160_DOUBLE_TAP
+		bool "Enable bmi160 chip double tap detection"
+		default n
+
+	config BMI160_DOUBLE_TAP_ONESHOT
+		bool "Disable double tap detection after it detected"
+		depends on BMI160_DOUBLE_TAP
+		default y
+
+	config BMI160_ENABLE_DOUBLE_TAP_AFTER_NOMOTION
+		bool "Enable double tap detection after no motion detected"
+		depends on BMI160_DOUBLE_TAP
+		depends on BMI160_NO_MOTION
+		default y
+
+	config BMI160_ENABLE_NOMOTION_AFTER_DOUBLE_TAP
+		bool "Enable no motion detection after double tap detected"
+		depends on BMI160_DOUBLE_TAP
+		depends on BMI160_NO_MOTION
+		default y
+
+	config BMI160_LOWPOWER_AVG
+		int "average cyling number"
+		default 2
+		help
+			Control the average cycling number of bmi160 accelerometer
+			in lowpower mode with undersampling enabled. The actual
+			average cycling number equals to 2^BMI160_BMI160_LOWPOWER_AVG.
+
+	config BMI160_LOWPOWER_AVG_NOMOTION
+		int "average cyling number in nomiton"
+		default 0
+		help
+			Control the average cycling number of bmi160 accelerometer
+			in lowpower mode in nomotion state with undersampling enabled.
+			The actual average cycling number equals to 2^BMI160_LOWPOWER_AVG_NOMOTION.
+
+	config BMI160_DEFAULT_ACCEL_RANGE
+		int "accelerometer sensing range"
+		default 8
+		help
+			Default sensing range of bmi160 accelerometer. The value can be 2, 4, 8, 16.
+			So that bmi160 accelerometer sensing range can be +-2g, +-4g, +-8g, +-16g.
+
+	config BMI160_CONVERT_ACCEL_DATA
+		bool "convert accel data in mg"
+		default y
+		help
+			Convert accel sensor data in mg.
+
+	config BMI160_DEFAULT_GYRO_RANGE
+		int "gyro sensing range"
+		default 1000
+		help
+			Default sensing range of bmi160 gyro. The value can be 125, 250, 500, 1000, 2000.
+			So that bmi160 gyro sensing range can be +-125 degree/s, +-250 degree/s, +-500 degree/s,
+			+-1000 degree/s, +-2000 degree/s.
+
+	config BMI160_CONVERT_GYRO_DATA
+		bool "convert gyro data in millidegree/s"
+		default y
+		help
+			Convert accel sensor data in millidegree/s.
+
+	config BMI160_TCMD
+		bool "enable test cmd to show bmi160 interrupt status"
+
+endif # BMI160
+
+comment "The BMI160 driver requires either the SPI or I2C Sensor Subsystem driver"
+	depends on !SS_I2C && !SS_SPI
+
+config APDS9190
+	bool "apds9190 IR proximity driver"
+	depends on I2C
+
+config BME280_SPI
+	bool
+
+menuconfig BME280
+		bool "BME280 sensor driver"
+		depends on SS_I2C || SS_SPI
+		select SBA
+		select SENSOR_BUS_COMMON
+
+if BME280
+
+	choice
+		prompt "Communication bus"
+		default BME280_I2C
+
+	config BME280_I2C
+		bool "I2C"
+		depends on SS_I2C
+
+	config BME280_SPI
+		bool "SPI"
+		depends on SS_SPI
+
+	endchoice
+
+	config BME280_ENABLE_INT64
+		bool "support int64"
+		default y
+		help
+			Support int64_t when compensate pressure value. When this option is enabled, the pressure value got from driver is in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits). Output value of "24674867" represents 24674867 / 256 = 96386.2 Pa = 963.862 hPa.
+
+endif # BMI280
+
+comment "The BME280 driver requires either the SPI or I2C Sensor Subsystem driver"
+	depends on !SS_I2C && !SS_SPI
+
+config OHRM
+	bool
+
+config OHRM_DRIVER
+	bool "OHRM driver"
+	depends on SS_SPI
+	select OHRM
+	select SBA
+	select SENSOR_BUS_COMMON
+	depends on PACKAGE_ALGOHRM
+
+comment "The OHRM driver requires the SPI Sensor Subsystem driver"
+	depends on !SS_SPI
+
+comment "The OHRM driver requires package algohrm"
+	depends on !PACKAGE_ALGOHRM

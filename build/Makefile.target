@@ -1,0 +1,271 @@
+# Copyright (c) 2016, Intel Corporation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+#
+# This file contains the GNU Make templates used to generate build rules for
+# the SDK targets.
+#
+
+################################################################################
+# Important notice for maintainers of this file:
+#
+# When using make variables in a template, double-escape them using $$ to make
+# sure they are evaluated only when the rules are evaluated, and not when the
+# template is invoked to create the rules.
+#
+# The only variables that are expanded immediately are:
+# - the template parameters ($(1),...),
+# - those whose value is already set when the template is called ($(OUT),...).
+#
+################################################################################
+
+# Global output directory for targets binaries
+TARGETS_OUT = $(OUT)/firmware
+
+#
+# Generic rules to build, clean and mrproper all targets
+#
+# Specific rules to clean individual packages will be added as prerequisites
+# to these rules and run automatically
+#
+targets:
+targets_clean:
+targets_mrproper:
+.PHONY: targets targets_clean targets_mrproper
+
+#
+# Target automatic variable export helpers
+#
+# Variables prefixed by the target name are automatically passed
+# to the target Makefile
+#
+
+#
+# Create a Make command-line variable assignment, in the form VAR=$(target_VAR)
+#
+define set_auto_vars
+$(patsubst $(1)_%,%,$(2))="$$($(2))"
+endef
+
+# Filter variables known to Make to identify those related to the target
+define auto_vars
+$(filter $(1)_%,$(.VARIABLES))
+endef
+
+#
+# Target Makefile invocation helper
+#
+# Calls the target Makefile with the specified goal
+#
+# Parameters:
+# - name : the target name (example: bootloader)
+# - path : the path to the target root directory (contains the target Makefile)
+# - goal : the goal to generate
+#
+define make_target
+$$($(1)_ENV_VARS)                  \
+$$($(1)_ENV_AUTO_VARS)             \
+$$(MAKE) -C $2 $3                  \
+	OUT=$$($(1)_OUT)               \
+	T=$$(T)                        \
+	BOARD=$$(BOARD)                \
+	BUILDVARIANT=$$(BUILDVARIANT)  \
+	PKG_OUT=$$(PKG_OUT)
+endef
+
+define add_goal
+$(3):
+	$(call make_target,$(1),$(2),$(3))
+endef
+
+#
+# Generic targets template
+#
+# Generic targets are targets relying on an external build-system to produce
+# their Makefile: we only interact with them through standard GNU Make
+# conventions.
+#
+# To add a new target:
+#
+# 1. Write a Makefile for the target, implementing 'all' and 'clean'
+#
+# 2. Define the following target variables (target name is used as a prefix):
+#  - target_FILES : the space-separated list of paths to target output files,
+#                   relative to the target output directory
+#  - target_VARS  : the space-separated list of common variable names to be
+#                   passed to the target Makefile
+#  - target_XX    : additional specific variables that will be converted to
+#                   generic ones when passed to the Makefile
+#
+# The reason why we have two mechanisms for variables is to avoid conflicts
+# when two targets use the same variable name, but with different values.
+#
+# Example: DEFCONFIG, DEPENDS, ...
+#
+# Note that the per-target variables are passed in the environment, ie before
+# the make command, allowing the called Makefile to modify them.
+# In the contrary, some mandatory build variables that must not be modified,
+# like T, OUT, are passed on the command line (ie after the make command),
+# making them read-only.
+#
+# 3. Call the generic_target function, specifying the package name and path
+#
+# When building the generic image target, the build system will for each target:
+#  - create the target output directory,
+#  - call the target Makefile with the generic 'all' goal, passing target
+#    variables on the command line,
+#  - copy all target files from the target output directory to the global output
+#    directory
+#
+# The build system will also dispatch the clean goal on each Makefile target.
+#
+# Example:
+#
+# The following target declaration:
+#
+# foo_FILES = baz.bin baz.elf
+# foo_VARS  = QUX
+# QUX       = 42
+# foo_QUUX  = 666
+#
+# $(call generic_target,foo,$(PROJECT_PATH)/bar)
+#
+# Will produce the following commands when make foo is invoked:
+#
+# make -C $(PROJECT_PATH)/bar all QUX=42 QUUX=666 OUT=$(OUT)/foo
+# cp foo/baz.bin foo/baz.elf $(OUT)/firmware
+#
+define generic_target_template
+
+# Create a variable to hold the target output subdirectory
+$(1)_OUT = $$(OUT)/$(1)
+
+# Apply substitutions on target files list to calculate output files
+$(1)_OUT_FILES = $$($(1)_FILES:%=$$($(1)_OUT)/%)
+$(1)_NOTDIR_FILES = $$(notdir $$($(1)_FILES))
+$(1)_TARGETS_OUT_FILES = $$($(1)_NOTDIR_FILES:%=$$(TARGETS_OUT)/%)
+
+# Prepare command line variables for targets in the form XX=$(XX)
+
+# First vars that have been declared explicitly as needing to be passed
+$(1)_ENV_VARS = $(foreach var,$($(1)_VARS),$(var)=$$($(var)))
+# Then automatic variables of the form target_XX
+$(1)_ENV_AUTO_VARS = $(foreach var,$(call auto_vars,$(1)),$(call set_auto_vars,$(1),$(var)))
+
+# Output files recipe (depends on phony build target)
+$$($(1)_TARGETS_OUT_FILES): $(1)
+
+# Meta build recipe ('make all')
+$(1): $(HOST_TOOLS)
+	@echo $$(ANSI_CYAN)"Building $(1)"$$(ANSI_OFF)
+	$$(AT)mkdir -p $$($(1)_OUT)
+	$$(AT)$(call make_target,$(1),$(2),all)
+	$$(AT)mkdir -p $$(TARGETS_OUT)
+	$$(AT)cp $$($(1)_OUT_FILES) $$(TARGETS_OUT)
+	@echo $$(ANSI_CYAN)"Done $(1)"$$(ANSI_OFF)
+
+# Meta clean recipe ('make clean')
+$(1)_clean:
+	$$(AT)if [ -d $$($(1)_OUT) ]; then \
+		echo $$(ANSI_CYAN)Cleaning $(1)$$(ANSI_OFF); \
+		$(call make_target,$(1),$(2),clean);         \
+	fi
+
+# Meta MrProper recipe (will wipe out output subdirectory)
+$(1)_mrproper: $(1)_clean
+	@if [ -d $$($(1)_OUT) ]; then \
+		echo $$(ANSI_RED)[RM]$$(ANSI_OFF) $$($(1)_OUT); \
+		rm -rf $$($(1)_OUT);                            \
+	fi
+
+# Help double-colon recipe (will aggregate with other help)
+help::
+	@echo ' $(1)       - build $(1)'
+	@echo ' $(1)_clean - clean $(1)'
+	@echo
+
+# Declare specific meta targets as prerequisite to generic meta targets
+targets: $(1)
+targets_clean: $(1)_clean
+targets_mrproper: $(1)_mrproper
+
+# Declare meta targets as PHONY to avoid clashes with actual files or dirs
+.PHONY: $(1) $(1)_clean $(1)_mrproper
+
+$(foreach goal,$($(1)_GOALS),$(eval $(call add_goal,$(1),$(2),$(goal))))
+
+endef
+
+#
+# Kconfig/Kbuild Make target template
+#
+define kconfig_target_template
+
+# Kconfig targets require special variables to be specified
+$(eval $(1)_VARS += SOC_PATH BOARD_PATH ARCH)
+
+# Inherit from generic target
+$(call generic_target_template,$(1),$(2))
+
+# These targets require packages Kconfig rules to have been generated
+$(1): $(PKG_OUT)/Kconfig
+
+# Meta Kconfig targets
+
+$(1)_menuconfig: $(PKG_OUT)/Kconfig
+	$$(AT)$(call make_target,$(1),$(2),menuconfig)
+
+$(1)_savedefconfig: $(PKG_OUT)/Kconfig
+	$$(AT)$(call make_target,$(1),$(2),savedefconfig)
+
+# Declare meta targets as PHONY to avoid clashes with actual files or dirs
+.PHONY: $(1)_menuconfig $(1)_savedefconfig
+
+endef
+
+#
+# Create Make rules for a generic target
+#
+# Parameters:
+# - name : the target name (example: bootloader)
+# - path : the path to the target root directory (contains the target Makefile)
+#
+define generic_target
+$(eval $(call generic_target_template,$(1),$(2)))
+endef
+
+#
+# Create Make rules for a Kbuild/Kconfig target
+#
+# Parameters:
+# - name : the target name (example: bootloader)
+# - path : the path to the target root directory (contains the target Makefile)
+#
+define kconfig_target
+$(eval $(call kconfig_target_template,$(1),$(2)))
+endef
