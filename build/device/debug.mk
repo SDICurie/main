@@ -59,7 +59,7 @@ debug_console_qrk: debug_start
 	@# Make sure that we re-resume the target after quitting gdb
 	$(AT)echo "monitor resume" >> gdbdeinit
 	$(AT)echo "quit" >> gdbdeinit
-	-bash -c "PYTHONHOME=$(T)/external/toolchain/tools/python $(GDB_QRK) $(ELF); $(GDB_QRK) $(ELF) -x gdbdeinit > /dev/null; rm gdbdeinit; $(MAKE) debug_stop"
+	-bash -c "PYTHONHOME=$(TOOLCHAIN_DIR)/tools/python $(GDB_QRK) $(ELF); PYTHONHOME=$(TOOLCHAIN_DIR)/tools/python $(GDB_QRK) $(ELF) -x gdbdeinit > /dev/null; rm gdbdeinit; $(MAKE) debug_stop"
 	@# All make command after this line will not be executed when the user quit gdb using CTRL + C
 
 debug_console_arc: ELF := $(OUT)/firmware/arc.elf
@@ -75,7 +75,7 @@ debug_console_arc: debug_start
 	@# Make sure that we re-resume the target after quitting gdb
 	$(AT)echo "monitor resume" >> gdbdeinit
 	$(AT)echo "quit" >> gdbdeinit
-	-bash -c "PYTHONHOME=$(T)/external/toolchain/tools/python $(GDB_ARC) $(ELF); $(GDB_ARC) $(ELF) -x gdbdeinit > /dev/null; rm gdbdeinit; $(MAKE) debug_stop"
+	-bash -c "PYTHONHOME=$(TOOLCHAIN_DIR)/tools/python $(GDB_ARC) $(ELF); PYTHONHOME=$(TOOLCHAIN_DIR)/tools/python $(GDB_ARC) $(ELF) -x gdbdeinit > /dev/null; rm gdbdeinit; $(MAKE) debug_stop"
 	@# All make command after this line will not be executed when the user quit gdb using CTRL + C
 
 debug_stop:
