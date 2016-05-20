@@ -45,6 +45,7 @@ $(OUT)/tools $(OUT)/tools/bin $(OUT)/tools/lib $(OUT)/tools/intermediates:
 	$(AT)mkdir -p $@
 
 $(OUT)/tools/bin/ota.py: $(T)/tools/scripts/build_utils/ota.py
+	$(AT)mkdir -p $(OUT)/tools/bin/
 	$(AT)cp $(T)/tools/scripts/build_utils/ota.py $(OUT)/tools/bin/ota.py
 
 $(OUT)/tools/bin/bsdiff_chunk.py: $(T)/tools/scripts/build_utils/bsdiff_chunk.py

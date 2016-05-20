@@ -54,7 +54,8 @@ OTA_SIGNING_KEY ?= $(T)/build/security/keys/ota_private.der
 
 # OTA package tool
 OTA_PACKAGE_TOOL := $(OUT)/tools/bin/curie_ota.py
-$(OTA_PACKAGE_TOOL): $(OUT)/tools/bin
+$(OTA_PACKAGE_TOOL): $(T)/projects/curie_common/build/curie_ota.py
+	$(AT)mkdir -p $(OUT)/tools/bin
 	$(AT)cp $(T)/projects/curie_common/build/curie_ota.py $(OTA_PACKAGE_TOOL)
 
 # Tools dependencies
