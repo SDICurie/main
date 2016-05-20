@@ -17,6 +17,10 @@ config NFC_STN54_FW_UPDATE
 	depends on HAS_SPI_FLASH
 	depends on NFC_STN54_SUPPORT
 
+config NFC_STN54_HIBERNATE
+	bool "Enable hibernate support"
+	depends on NFC_STN54_SUPPORT
+
 config NFC_STN54_DEBUG_RX_MESSAGE
 	bool "Print RX message information"
 	depends on NFC_STN54_SUPPORT

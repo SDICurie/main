@@ -549,8 +549,6 @@ static fsm_state_t act_goto_OFF(struct fsm_event_message *evt)
 
 fsm_state_t act_init(struct fsm_event_message *evt)
 {
-	uint8_t cmd = 1; /* Hibernate exit */
-
 	/* refuse svc command if another one is pending */
 	if (set_msg_cb(evt->msg_cb) > 0) {
 		pr_warning(LOG_MODULE_NFC, "another command is pending.");
@@ -561,7 +559,12 @@ fsm_state_t act_init(struct fsm_event_message *evt)
 #ifdef CONFIG_NFC_COMPARATOR_IRQ
 	nfc_stn54_config_irq_out();
 #endif
+
+#if CONFIG_NFC_STN54_HIBERNATE
+	uint8_t cmd = 1; /* Hibernate exit */
 	nfc_scn_queue(nfc_scn_set_mode, 1000, sizeof(cmd), &cmd);
+#endif
+
 	nfc_scn_queue(nfc_scn_reset_init, 200, 0, NULL);
 	nfc_scn_start();
 	return ST_INIT;

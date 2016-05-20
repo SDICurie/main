@@ -101,6 +101,7 @@ static void handle_nfc_stop_rf(struct cfw_message *msg, bool *free_msg)
 
 static void handle_nfc_hibernate(struct cfw_message *msg, bool *free_msg)
 {
+#if CONFIG_NFC_STN54_HIBERNATE
 	/* setup callback function for response */
 	struct nfc_msg_cb *hibernate_cb =
 		(struct nfc_msg_cb *)balloc(sizeof(*hibernate_cb), NULL);
@@ -109,6 +110,17 @@ static void handle_nfc_hibernate(struct cfw_message *msg, bool *free_msg)
 	hibernate_cb->msg_cb = nfc_generic_rsp_callback;
 	*free_msg = false;
 	nfc_fsm_event_post(EV_NFC_HIBERNATE, NULL, hibernate_cb);
+#else
+	nfc_service_rsp_msg_t *resp =
+		(nfc_service_rsp_msg_t *)cfw_alloc_rsp_msg(
+			msg,
+			MSG_ID_NFC_SERVICE_HIBERNATE_RSP,
+			sizeof(
+				*resp));
+	resp->status = NFC_STATUS_NOT_SUPPORTED;
+	*free_msg = true; /* discard 'msg' in 'handle_message' function */
+	cfw_send_message(resp);
+#endif
 }
 
 static void nfc_generic_rsp_callback(struct cfw_message *msg, uint8_t result)
