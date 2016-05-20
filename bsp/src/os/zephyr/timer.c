@@ -36,10 +36,7 @@
 #include "os/os.h"
 #include "infra/panic.h"
 #include "common.h"
-
-#ifndef _GET_TICK
-#define _GET_TICK()             (sys_tick_get_32())
-#endif
+#include "infra/time.h"
 
 /*type for timer status */
 typedef enum {
@@ -237,7 +234,7 @@ static void add_timer(T_TIMER_LIST_ELT *newTimer)
 	_log(
 		"\nINFO : add_timer - start: adding 0x%x to expire at %d (now = %d - delay = %d - ticktime = %d)",
 		(uint32_t)newTimer, newTimer->desc.expiration,
-		_GET_TICK(), newTimer->desc.delay, sys_clock_us_per_tick);
+		get_uptime_ms(), newTimer->desc.delay, sys_clock_us_per_tick);
 	display_list();
 #endif
 
@@ -306,7 +303,7 @@ static void remove_timer(T_TIMER_LIST_ELT *timerToRemove)
 	_log(
 		"\nINFO : remove_timer - start: removing 0x%x to expire at %d (now = %d)",
 		(uint32_t)timerToRemove, timerToRemove->desc.expiration,
-		_GET_TICK());
+		get_uptime_ms());
 	display_list();
 #endif
 
@@ -365,7 +362,7 @@ static void execute_callback(T_TIMER_LIST_ELT *expiredTimer)
 	_log(
 		"\nINFO : execute_callback : executing callback of timer 0x%x  (now = %u - expiration = %u)",
 		(uint32_t)expiredTimer,
-		_GET_TICK(), expiredTimer->desc.expiration);
+		get_uptime_ms(), expiredTimer->desc.expiration);
 #endif
 
 	/* if the timer was not stopped by its own callback */
@@ -378,7 +375,7 @@ static void execute_callback(T_TIMER_LIST_ELT *expiredTimer)
 		/* add it again if repeat flag was on */
 		if (expiredTimer->desc.repeat) {
 			disable_scheduling();
-			expiredTimer->desc.expiration = _GET_TICK() +
+			expiredTimer->desc.expiration = get_uptime_ms() +
 							expiredTimer->desc.
 							delay;
 			add_timer(expiredTimer);
@@ -452,29 +449,33 @@ void os_init_timer(void)
 /**
  * Return the current tick converted in milliseconds.
  *
- * Authorized execution levels:  task, fiber, ISR
+ * Authorized execution levels:  task, fiber
+ *
+ * @warning: the return value is false in interrupt context.
  *
  * @return current tick converted in milliseconds
  */
 uint32_t get_time_ms(void)
 {
-	return (uint32_t)CONVERT_TICKS_TO_MS(_GET_TICK());
+	return (uint32_t)CONVERT_TICKS_TO_MS(sys_tick_get_32());
 }
 
 /**
  * Return the current tick converted in microseconds.
  *
- * Authorized execution levels:  task, fiber, ISR
+ * Authorized execution levels:  task, fiber
  *
  * ZEPHYR does not provide an API to read a high-precision timer, that
  * returns a 64-bits value.
  * The tick is read as a 32-bits value, then casted to 64-bits.
  *
+ * @warning: the return value is false in interrupt context.
+ *
  * @return current tick converted in microseconds
  */
 uint64_t get_time_us(void)
 {
-	return (uint64_t)CONVERT_TICKS_TO_US(_GET_TICK());
+	return (uint64_t)CONVERT_TICKS_TO_US(sys_tick_get_32());
 }
 
 /**
@@ -503,11 +504,6 @@ T_TIMER timer_create(T_ENTRY_POINT callback, void *privData, uint32_t delay,
 {
 	T_TIMER_LIST_ELT *timer = NULL;
 
-#ifdef CONFIG_NANOKERNEL /********************** NANO KERNEL SPECIFIC:  */
-	if (delay > 0 && delay < CONVERT_TICKS_TO_MS(1)) {
-		delay = CONVERT_TICKS_TO_MS(1);
-	}
-#endif
 	/* check input parameters */
 	if ((NULL != callback) && (OS_WAIT_FOREVER != delay)) {
 		/* delay should be set to 0 if startup flag is false
@@ -522,15 +518,15 @@ T_TIMER timer_create(T_ENTRY_POINT callback, void *privData, uint32_t delay,
 				/* initialize timer descriptor */
 				timer->desc.callback = callback;
 				timer->desc.data = privData;
-				timer->desc.delay = CONVERT_MS_TO_TICKS(delay);
+				timer->desc.delay = delay;
 				timer->desc.repeat = repeat;
 				timer->desc.status = E_TIMER_READY;
 
 				/* insert timer in the list of active timers */
 				if (startup) {
-					timer->desc.expiration = _GET_TICK() +
-								 timer->desc.
-								 delay;
+					timer->desc.expiration =
+						get_uptime_ms() +
+						timer->desc.delay;
 					disable_scheduling();
 					add_timer(timer);
 					enable_scheduling();
@@ -544,7 +540,7 @@ T_TIMER timer_create(T_ENTRY_POINT callback, void *privData, uint32_t delay,
 				_log(
 					"\nINFO : timer_create : new timer will expire at %u (now = %u ) - addr = 0x%x",
 					timer->desc.expiration,
-					_GET_TICK(), (uint32)timer);
+					get_uptime_ms(), (uint32)timer);
 #endif
 				error_management(err, E_OS_OK);
 			} else {
@@ -584,8 +580,8 @@ void timer_start(T_TIMER tmr, uint32_t delay, OS_ERR_TYPE *err)
 				_log("\nINFO : timer_start : starting  timer ");
 #endif
 				/* Update expiration time */
-				timer->desc.delay = CONVERT_MS_TO_TICKS(delay);
-				timer->desc.expiration = _GET_TICK() +
+				timer->desc.delay = delay;
+				timer->desc.expiration = get_uptime_ms() +
 							 timer->desc.delay;
 				disable_scheduling();
 				/* add the timer */
@@ -693,7 +689,7 @@ void timer_delete(T_TIMER tmr)
  * need to be awoken after a deepsleep.
  * It can be used by slaves CPUs when they need to tell a master CPU when it
  * can switch the SOC to deepsleep, like in the Quark SE SOC */
-void __attribute__ ((weak)) publish_cpu_timeout(uint32_t timeout_tick)
+void __attribute__ ((weak)) publish_cpu_timeout(uint32_t timeout_ms)
 {
 }
 
@@ -714,7 +710,7 @@ void __attribute__ ((weak)) publish_cpu_timeout(uint32_t timeout_tick)
  */
 void timer_task(int dummy1, int dummy2)
 {
-	int64_t timeout = TICKS_UNLIMITED;
+	int64_t timeout = UINT32_MAX;
 	uint32_t now;
 
 	UNUSED(dummy1);
@@ -723,16 +719,16 @@ void timer_task(int dummy1, int dummy2)
 	while (1) { /* the Timer task shall never stop */
 		/* block until g_TimerSem is signaled or until the next timeout expires */
 #ifdef CONFIG_MICROKERNEL
-		(void)task_sem_take(g_TimerSem, timeout);
+		(void)task_sem_take(g_TimerSem, CONVERT_MS_TO_TICKS(timeout));
 #else
-		nano_sem_take(&g_TimerSem, timeout);
+		nano_sem_take(&g_TimerSem, CONVERT_MS_TO_TICKS(timeout));
 #endif
 		if (g_CurrentTimerHead == NULL) {
-			/* Convention is to use INT_MAX (=0x7FFFFFFF) to indicate
+			/* Convention is to use UINT32_MAX to indicate
 			 * that we don't have any known constraint */
 			publish_cpu_timeout(UINT32_MAX);
 		}
-		now = _GET_TICK();
+		now = get_uptime_ms();
 		/* task is unblocked: check for expired timers */
 		while (g_CurrentTimerHead &&
 		       is_after_expiration(now, &(g_CurrentTimerHead->desc))) {
@@ -740,27 +736,27 @@ void timer_task(int dummy1, int dummy2)
 		}
 		/* Compute timeout until the expiration of the next timer */
 		if (g_CurrentTimerHead != NULL) {
-			now = _GET_TICK();
+			now = get_uptime_ms();
 			/* In micro kernel context, timeout = 0 or timeout < 0 works.
 			 * In nano kernel context timeout must be a positive value.
 			 */
 			timeout = g_CurrentTimerHead->desc.expiration - now;
 			publish_cpu_timeout(timeout);
 		} else {
-			timeout = INT_MAX;
+			timeout = UINT32_MAX;
 		}
 
 #ifdef __DEBUG_OS_ABSTRACTION_TIMER
 		if (NULL != g_CurrentTimerHead)
 			_log(
 				"\nINFO : timer_task : now = %u, next timer expires at %u, timeout = %u",
-				_GET_TICK(),
+				get_uptime_ms(),
 				g_CurrentTimerHead->desc.expiration,
 				timeout);
 		else
 			_log(
 				"\nINFO : timer_task : now = %u, no next timer, timeout = OS_WAIT_FOREVER",
-				_GET_TICK());
+				get_uptime_ms());
 #endif
 	} /* end while(1) */
 }

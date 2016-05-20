@@ -118,16 +118,17 @@ void soc_setup()
 	shared_data->arc_ready = 1;
 }
 
-void publish_cpu_timeout(uint32_t timeout_tick)
+void publish_cpu_timeout(uint32_t timeout_ms)
 {
-	if (timeout_tick == UINT32_MAX) {
+	if (timeout_ms == UINT32_MAX) {
 		shared_data->arc_next_wakeup_valid = false;
 		shared_data->arc_next_wakeup = 0;
 	} else {
 		shared_data->arc_next_wakeup_valid = true;
 
-		uint32_t timeout32k = get_uptime_32k() + CONVERT_TICKS_TO_32K(
-			timeout_tick);
+		uint32_t timeout32k = get_uptime_32k() +
+				      (timeout_ms * (uint64_t)1000 * 32768 /
+				       1000000);
 		shared_data->arc_next_wakeup = timeout32k;
 	}
 	/* Wakeup Quark core so it can acknowledge the request quickly */

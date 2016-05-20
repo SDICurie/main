@@ -742,8 +742,8 @@ void queue_send_message_head(T_QUEUE queue, T_QUEUE_MESSAGE message,
  *
  * Function name       | Task ctxt | Fiber ctxt| Interrupt |
  * --------------------|:---------:|:---------:|:---------:|
- * @ref get_time_ms    |     X     |     X     |     X     |
- * @ref get_time_us    |     X     |     X     |     X     |
+ * @ref get_time_ms    |     X     |     X     |           |
+ * @ref get_time_us    |     X     |     X     |           |
  * @ref timer_create   |     X     |     X     |     X     |
  * @ref timer_start    |     X     |     X     |     X     |
  * @ref timer_stop     |     X     |     X     |     X     |
@@ -757,7 +757,9 @@ void queue_send_message_head(T_QUEUE queue, T_QUEUE_MESSAGE message,
  *
  * Return the current tick converted in milliseconds.
  *
- * <b>Authorized execution levels:</b>  task, fiber, ISR.
+ * <b>Authorized execution levels:</b>  task, fiber.
+ *
+ * @warning: the return value is false in interrupt context.
  *
  * @return Current tick converted in milliseconds.
  */
@@ -768,7 +770,9 @@ uint32_t get_time_ms(void);
  *
  * Return the current tick converted in microseconds.
  *
- * <b>Authorized execution levels:</b>  task, fiber, ISR.
+ * <b>Authorized execution levels:</b>  task, fiber.
+ *
+ * @warning: the return value is false in interrupt context.
  *
  * @return Current tick converted in microseconds.
  */
