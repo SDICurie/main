@@ -139,14 +139,6 @@ static void apds_update_threshold_callback(struct sba_request *req)
 	sba_exec_dev_request((struct sba_device *)dev, &ir_dev->irq_req);
 }
 
-/* Driver inits are done sequentially, so we can use a global variable */
-static volatile bool apds_irq_probing;
-static void irq_probe_cb(void *param)
-{
-	/* Probing successful */
-	apds_irq_probing = true;
-}
-
 static void comparator_cb(void *param)
 {
 	struct td_device *dev = (struct td_device *)param;
@@ -223,47 +215,21 @@ static int apds9190_init(struct td_device *device)
 		goto apds_polling_mode;
 	}
 
-	/* Check that interrupt signal is working */
 	ir_dev->comparator_device =
 		(struct td_device *)&pf_device_soc_comparator;
 
-	/* Configure device to probe interrupt line */
-	i2c_write_reg(device, REG_PTIME, 0xFF);
-	i2c_write_reg(device, REG_WTIME, 0xFF);
-	i2c_write_reg(device, REG_PERS, 0x30);
-	i2c_write_reg(device, REG_CONFIG, 0x00);
-	i2c_write_reg(device, REG_PPCOUNT, 10);
-	i2c_write_reg(device, REG_CONTROL, CONTROL_ENABLE_CH1 | CONTROL_12mA);
-	apds9190_set_threshold(device, 0x3ff, 0);
+	pr_info(LOG_MODULE_DRV, "apds: use interrupt mode");
+	apds9190_update_config(device);
+	apds9190_set_threshold(device, 0, ir_dev->piht);
 	/* Enable apds9190 device in interrupt mode */
 	apds9190_set_enable(device, ENABLE_PON |
 			    ENABLE_PIEN |
 			    ENABLE_WEN |
 			    ENABLE_PEN);
-
-	/* Clear interrupt flag */
 	apds9190_clear_irq(device);
-	apds_irq_probing = false;
 	comp_configure(ir_dev->comparator_device,
-		       ir_dev->comp_pin, 1, 1, irq_probe_cb, NULL);
-	/* Wait for the apds to notify interrupt if any */
-	task_sleep(150);
+		       ir_dev->comp_pin, 1, 1, comparator_cb, device);
 
-	if (apds_irq_probing) {
-		/* IRQ line working, ready to detect proximity */
-		pr_info(LOG_MODULE_DRV, "apds: use interrupt mode");
-		apds9190_update_config(device);
-		apds9190_set_threshold(device, 0, ir_dev->piht);
-		apds9190_clear_irq(device);
-		comp_configure(ir_dev->comparator_device,
-			       ir_dev->comp_pin, 1, 1, comparator_cb, device);
-	} else {
-		/* Disable comparator, use polling mode */
-		comp_disable(ir_dev->comp_pin);
-		/* Set valid device configuration */
-		apds9190_update_config(device);
-		goto apds_polling_mode;
-	}
 	return 0;
 
 apds_polling_mode:
