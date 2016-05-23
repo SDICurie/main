@@ -227,12 +227,14 @@ void system_event_fill_header(struct system_event *e, int type)
 	e->h.timestamp = time();
 }
 
-void system_event_push_boot_event(enum boot_targets target)
+void system_event_push_boot_event(enum reset_reasons	reset_reason,
+				  enum boot_targets	boot_target)
 {
 	struct system_event evt;
 
 	system_event_fill_header(&evt, SYSTEM_EVENT_TYPE_BOOT);
-	evt.event_data.boot.reason = target;
+	evt.event_data.boot.reason = reset_reason;
+	evt.event_data.boot.target = boot_target;
 	system_event_push(&evt);
 }
 

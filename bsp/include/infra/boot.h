@@ -44,6 +44,21 @@
  */
 
 /**
+ * List of all reset reasons
+ */
+enum reset_reasons {
+	RESET_HW,                    /*  Initiated via HW ON/OFF POWER                   */
+	RESET_DEBUG,
+	RESET_SW,                    /*  Initiated via Reset Control register            */
+	RESET_HOST_HW_WATCHDOG,      /*  Triggered by Quark Watchdog expiring         */
+	RESET_SS_HW_WATCHDOG,        /*  Triggered by Arc Watchdog expiring              */
+	RESET_INT_QRK,               /*  Triggered by event interrupt routed to Quark */
+	RESET_INT_SS,                /*  Triggered by event interrupt routed to Arc      */
+	RESET_UNKNOWN,
+	RESET_REASON_SIZE,
+};
+
+/**
  * List of all boot targets.
  */
 enum boot_targets {
