@@ -717,17 +717,14 @@ void timer_task(int dummy1, int dummy2)
 	UNUSED(dummy2);
 
 	while (1) { /* the Timer task shall never stop */
+		/* Before waiting for next timeout, publish it to warn QUARK cpu */
+		publish_cpu_timeout(timeout);
 		/* block until g_TimerSem is signaled or until the next timeout expires */
 #ifdef CONFIG_MICROKERNEL
 		(void)task_sem_take(g_TimerSem, CONVERT_MS_TO_TICKS(timeout));
 #else
 		nano_sem_take(&g_TimerSem, CONVERT_MS_TO_TICKS(timeout));
 #endif
-		if (g_CurrentTimerHead == NULL) {
-			/* Convention is to use UINT32_MAX to indicate
-			 * that we don't have any known constraint */
-			publish_cpu_timeout(UINT32_MAX);
-		}
 		now = get_uptime_ms();
 		/* task is unblocked: check for expired timers */
 		while (g_CurrentTimerHead &&
@@ -741,7 +738,6 @@ void timer_task(int dummy1, int dummy2)
 			 * In nano kernel context timeout must be a positive value.
 			 */
 			timeout = g_CurrentTimerHead->desc.expiration - now;
-			publish_cpu_timeout(timeout);
 		} else {
 			timeout = UINT32_MAX;
 		}
