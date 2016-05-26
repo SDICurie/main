@@ -51,6 +51,7 @@ static int pm_state;
 static void pm_timeout_cb(void *priv)
 {
 	pr_error(LOG_MODULE_QUARK_SE, "shutdown timeout");
+	pm_req = (enum pupdr_request)priv;
 	/* Force shutdown */
 	pm_shutdown();
 }
@@ -100,8 +101,8 @@ static void pm_shutdown_event_shutdown_hook_complete()
 void pm_shutdown_request(enum pupdr_request req, int param)
 {
 	/* start timeout timer */
-	timer_create(pm_timeout_cb, NULL, PM_SHUTDOWN_TIMEOUT, false, true,
-		     NULL);
+	timer_create(pm_timeout_cb, (void *)req, PM_SHUTDOWN_TIMEOUT, false,
+		     true, NULL);
 	log_flush();
 	pm_state = param;
 
