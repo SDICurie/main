@@ -38,7 +38,7 @@ Download the sources files:
 
 Initialize the environment:
 
-``sudo make -C wearable_device_sw/projects/curie_hello/ one_time_setup``
+``make -C wearable_device_sw/projects/curie_hello/ one_time_setup``
 
 BUILD AND FLASH A PROJECT
 *************************
