@@ -57,8 +57,8 @@ _set-openocd-as-flasher-external-tool:
 	$(OPTION_FLASHTOOL_BINARY) --set-external-tool openocd_upstream:$(OPENOCD)
 
 install-packages-required-by-emulator:
-	@if [ `grep -c "Ubuntu 12.04" /etc/issue` -eq 1 ];then sudo apt-get build-dep qemu-kvm;else sudo apt-get build-dep qemu;fi
-	sudo apt-get install libexpat1-dev libcairo-dev
+	@if [ `grep -c "Ubuntu 12.04" /etc/issue` -eq 1 ];then sudo apt-get -y build-dep qemu-kvm;else sudo apt-get -y build-dep qemu;fi
+	sudo apt-get -y install libexpat1-dev libcairo-dev
 
 # Doxygen
 DOXYGEN_MIN_VERSION="1.8.0"
@@ -77,15 +77,15 @@ _udev-rules: $(OUT_UDEV_RULES)/99-openocd.rules \
 # Main API, implement the per-project sub-targets
 one_time_setup: _udev-rules _set-openocd-as-flasher-external-tool
 	@echo Installing base build dependencies
-	sudo apt-get install python gawk git-core diffstat unzip zip texinfo gcc-multilib \
+	sudo apt-get -y install python gawk git-core diffstat unzip zip texinfo gcc-multilib \
 		build-essential chrpath libtool libc6:i386 doxygen graphviz tmux     \
 		libc6-dev-i386 uncrustify mscgen vim-common pigz libdbus-1-dev \
 		libglib2.0-dev
 	@$(MAKE) -s _check-doxygen_version
 	@echo Installing kconfig front-ends dependencies
-	sudo apt-get install autoconf pkg-config gperf flex bison libncurses5-dev
+	sudo apt-get -y install autoconf pkg-config gperf flex bison libncurses5-dev
 	@echo Installing protobuf compiler dependencies
-	sudo apt-get install protobuf-compiler python-protobuf
+	sudo apt-get -y install protobuf-compiler python-protobuf
 	@$(MAKE) -s install-packages-required-by-emulator
 
 check_host_setup: _tmux-exists \
