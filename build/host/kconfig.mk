@@ -31,10 +31,8 @@ KCONFIG_DIR = /tmp/kconfig_build
 KCONFIG_CONF = $(KCONFIG_DIR)/frontends/conf/conf
 KCONFIG_MCONF = $(KCONFIG_DIR)/frontends/mconf/mconf
 
-$(KCONFIG_DIR):
-	@mkdir -p $@
-
-$(KCONFIG_CONF) $(KCONFIG_MCONF): $(KCONFIG_DIR)
+$(KCONFIG_CONF) $(KCONFIG_MCONF):
+	@mkdir -p $(KCONFIG_DIR)
 	@echo "Building kconfig frontends tools"
 	(cd $(KCONFIG_SRC) && bash ./bootstrap)
 	(cd $(KCONFIG_DIR) \

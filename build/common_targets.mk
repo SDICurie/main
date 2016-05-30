@@ -82,6 +82,10 @@ include $(T)/build/doc.mk
 include $(T)/build/host/tools.mk
 include $(T)/build/host/check.mk
 
+# kconfig tools are required for some targets
+include $(T)/build/host/kconfig.mk
+HOST_TOOLS += $(KCONFIG_CONF)
+
 #### device rules
 include $(T)/build/device/flash.mk
 include $(T)/build/device/debug.mk

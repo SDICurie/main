@@ -59,7 +59,6 @@ $(OTA_PACKAGE_TOOL): $(T)/projects/curie_common/build/curie_ota.py
 	$(AT)cp $(T)/projects/curie_common/build/curie_ota.py $(OTA_PACKAGE_TOOL)
 
 # Tools dependencies
-HOST_TOOLS += $(KCONFIG_CONF) $(KCONFIG_MCONF)
 HOST_TOOLS += ota_tools
 
 include $(T)/build/common_targets.mk
