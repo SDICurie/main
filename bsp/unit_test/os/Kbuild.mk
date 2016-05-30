@@ -2,7 +2,7 @@ ifeq ($(CONFIG_QUARK_SE_QUARK),y)
 obj-y += int_stubs.o
 endif
 obj-$(CONFIG_PACKAGE_MATHLIB) += test_lib_math.o
-obj-$(CONFIG_BALIB) += test_balib.o
+obj-$(CONFIG_PACKAGE_BALIB) += test_balib.o
 obj-y += balib_test/
 obj-y += test_critical_section.o
 obj-y += test_queue.o

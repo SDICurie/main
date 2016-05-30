@@ -210,7 +210,7 @@ void test_task(void *param)
 	CU_RUN_TEST(lib_math_test);
 #endif
 
-#if defined (CONFIG_BALIB)
+#if defined (CONFIG_PACKAGE_BALIB)
 	cu_print("======================\n");
 	cu_print(" Basic Algorithms Library(BALIB) Tests");
 	CU_RUN_TEST(test_balib);
