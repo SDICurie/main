@@ -1,0 +1,63 @@
+Overview:
+-------------------------------------------------------------------------
+curie_ble project implements the following functionalities:
+1) A dummy cadence algorithm is added to sensor core running on ARC.
+   It uses internal accelerometer data.
+   It reports cadence every 5s when the device is moved.
+2) BLE stack is enabled.
+3) RSC BLE service is used to report stride length and computed cadence
+   to the companion phone.
+
+It implements a standard usage of the ble framework and sensor service.
+
+-------------------------------------------------------------------------
+To get data from the cadence sensor and send this data over BLE
+-------------------------------------------------------------------------
+1) Start scanning the sensor with STEPCADENCE_TYPE_MASK bit masking
+2) Subscribe to the sensor data with sensor handle, sampling and reporting
+   intervals.
+3) Collect the sensor data and report stride cadence through BLE RSC service.
+
+-------------------------------------------------------------------------
+Expected behavior
+-------------------------------------------------------------------------
+1) Stride length and stride cadence come on the NRF master control android apk.
+
+-------------------------------------------------------------------------
+How to test and Verify
+-------------------------------------------------------------------------
+1) Install NRF master control apk from Google play store
+2) Scan for the available ble devices from companion device
+3) Connect to your curie device. Check ble info with below commands
+	a) Enter "ble info" on UART console, it will provides the address
+           and GAP device name.
+	b) Scan for the same device name and connect to it
+4) Once connection is done, we can see Running and Speed Cadence and click on it
+5) Click RSC measurement, it will start report the cadence and stride length.
+6) Click again on the RSC measurement to unsubscribe sensor data, it stops
+   reporting stride length, cadence and distance
+7) Click on RSC measurement to restart and report the stride from zero
+
+-------------------------------------------------------------------------
+How to Compile the BLE project
+-------------------------------------------------------------------------
+The project is built 'out of tree'.
+First a build folder needs to be created (anywhere in the file-system).
+Better not to create this folder inside source tree.
+
+	mkdir out
+	cd out
+	make -f PATH_TO/wearable_device_sw/projects/curie_ble/Makefile setup
+	make package
+	make flash
+
+make flash will be used for flashing the board. By default,
+this file is located under "pub" in the OUT folder created above:
+
+	PATH_TO_OUT_FOLDER/pub/device/curie_ble/image/curie_101/release/
+
+The default location can be overridden by specifying the desired PUB path to
+the "make package" command:
+
+	make package PUB="/path/to/your/pub/folder"
+
