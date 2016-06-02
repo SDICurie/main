@@ -66,7 +66,7 @@
 #define FLASH_SECR_EFAIL_BIT  (0x40)       // Security-Register, Erase Fail bit
 #define FLASH_SECR_PFAIL_BIT  (0x20)       // Security-Register, Program Fail bit
 
-#define FLASH_SIZE            (0x1000000) // memory size in bytes (16777216)
+#define FLASH_SIZE            (0x200000)  // memory size in bytes (2097152)
 #define FLASH_PAGE_SIZE       (0x100)     // page size in units of bytes (256)
 #define FLASH_SECTOR_SIZE     (0x1000)    // sector size in units of bytes (4096)
 #define FLASH_BLOCK32K_SIZE   (0x8000)    // block size in units of bytes (32768)
