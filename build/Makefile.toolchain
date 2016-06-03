@@ -1,7 +1,7 @@
 TOOLCHAIN_DIR ?= $(T)/external/toolchain
 ifeq ($(wildcard $(TOOLCHAIN_DIR)/tools/compiler),)
 $(info No toolchain found under [$(TOOLCHAIN_DIR)].)
-$(info Please go to https://github.com/01org/curie-bsp/releases/ to download it.)
+$(info Please go to https://github.com/CurieBSP/main/releases to download it.)
 $(info Please specify the toolchain path using the TOOLCHAIN_DIR environment variable.)
 $(error )
 endif

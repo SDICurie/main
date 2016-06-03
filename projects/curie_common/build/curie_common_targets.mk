@@ -35,7 +35,7 @@ REF_BUILD_INFO ?= "$(PUB)/reference_build_info.json"
 
 ifeq ($(wildcard $(T)/packages/intel/curie-ble/Makefile),)
 $(info No BLE image found under [$(T)/packages/intel/curie-ble].)
-$(info Please go to https://github.com/01org/curie-bsp/releases/ to download it.)
+$(info Please go to https://github.com/CurieBSP/main/releases to download it.)
 $(error )
 endif
 

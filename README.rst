@@ -9,7 +9,6 @@ OS Ubuntu GNU/Linux as host.
 
 ONE TIME SETUP
 **************
-FIXME: update it with final setup once it's defined.
 
 Curie BSP needs a set of external projects to be built. The repo tool is currently used to fetch
 all the needed repositories.
@@ -30,7 +29,7 @@ Create your directory (eg. Curie_BSP):
 
 Initialize your repo:
 
-``repo init -u <Curie BSP manifest URL>``
+``repo init -u https://github.com/CurieBSP/manifest``
 
 Download the sources files:
 
