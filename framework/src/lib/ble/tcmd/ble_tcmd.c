@@ -1517,6 +1517,22 @@ void tcmd_ble_dbg(int argc, char *argv[], struct tcmd_handler_ctx *ctx)
 DECLARE_TEST_COMMAND_ENG(ble, dbg, tcmd_ble_dbg);
 #endif // CONFIG_TCMD_BLE_DEBUG
 
+void tcmd_ble_test(int argc, char *argv[], struct tcmd_handler_ctx *ctx)
+{
+	if (argc != 3)
+		goto print_help;
+
+	if (!memcmp(argv[2], "panic", 5)) {
+		nble_panic_req();
+		TCMD_RSP_FINAL(ctx, NULL);
+		return;
+	}
+
+print_help:
+	TCMD_RSP_ERROR(ctx, "Usage: ble test test_type");
+}
+DECLARE_TEST_COMMAND_ENG(ble, test, tcmd_ble_test);
+
 /*
  * documentation should be maintained in: wearable_device_sw/doc/test_command_syntax.md
  */

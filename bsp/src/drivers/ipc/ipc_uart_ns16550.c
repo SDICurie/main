@@ -220,13 +220,14 @@ void ipc_uart_isr()
 
 	while (uart_irq_update(info->uart_dev) &&
 	       uart_irq_is_pending(info->uart_dev)) {
-		if (uart_err_check(info->uart_dev)) {
-			uint8_t c;
-			if (uart_err_check(info->uart_dev) ==
-			    UART_ERROR_BREAK) {
+		int err;
+		err = uart_err_check(info->uart_dev);
+		if (err) {
+			if (err & UART_ERROR_BREAK) {
 				handle_panic_notification(BLE_CORE);
 			}
-			uart_poll_in(info->uart_dev, &c);
+			/* Handling this is impossible */
+			assert(err == 0);
 		} else if (uart_irq_rx_ready(info->uart_dev)) {
 			int rx_cnt;
 
