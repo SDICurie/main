@@ -59,7 +59,7 @@ A special target available on the SDK common targets has been created for that
 purpose. It must be run only once, with superuser privileges:
 
 \code
-user@tlsmachine:~/Curie_BSP$ sudo make -C wearable_device_sw/projects/curie_hello/ one_time_setup
+user@tlsmachine:~/Curie_BSP$ make -C wearable_device_sw/projects/curie_hello/ one_time_setup
 \endcode
 
 At this point all the software pre-requisites are met and you can start
