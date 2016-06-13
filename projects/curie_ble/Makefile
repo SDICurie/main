@@ -37,8 +37,8 @@ $(error The curie ble sample application can only run on the curie_101 Board)
 endif
 BUILDVARIANT ?= release
 
-quark_DEFCONFIG := $(PROJECT_PATH)/quark/defconfig
-arc_DEFCONFIG := $(PROJECT_PATH)/arc/defconfig
+quark_DEFCONFIG = $(PROJECT_PATH)/quark/defconfig
+arc_DEFCONFIG = $(PROJECT_PATH)/arc/defconfig
 
 # Optional: set the default version
 VERSION_MAJOR  := 1
@@ -46,3 +46,4 @@ VERSION_MINOR  := 0
 VERSION_PATCH  := 0
 
 include $(T)/build/project.mk
+
