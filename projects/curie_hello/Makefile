@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Intel Corporation. All rights reserved.
+# Copyright (c) 2016, Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -29,16 +29,16 @@
 THIS_DIR   := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 T          := $(abspath $(THIS_DIR)/../..)
 
-PROJECT      ?= curie_hello
-BOARD        ?= curie_101
+PROJECT      := curie_hello
+BOARD        := curie_101
 
 ifeq ($(filter curie_101, $(BOARD)),)
 $(error The curie hello sample application can only run on the curie_101 Board)
 endif
 BUILDVARIANT ?= debug
 
-quark_DEFCONFIG ?= $(PROJECT_PATH)/quark/defconfig
-arc_DEFCONFIG ?= $(PROJECT_PATH)/arc/defconfig
+quark_DEFCONFIG = $(PROJECT_PATH)/quark/defconfig
+arc_DEFCONFIG = $(PROJECT_PATH)/arc/defconfig
 
 # Optional: set the default version
 VERSION_MAJOR  := 1
