@@ -42,6 +42,7 @@
 
 #include "deep_sleep.h"
 #include "drivers/usb_pm.h"
+#include "drivers/clk_system.h"
 
 #include "machine.h"
 #include "machine/soc/intel/quark_se/quark/reboot_reg.h"
@@ -135,9 +136,15 @@ int pm_core_deepsleep()
 
 	// Platform Saved ctx
 	soc_suspend();
-
+	enum oscillator osc = clk_get_oscillator();
+	if (osc == CLK_OSC_EXTERNAL) {
+		clk_set_oscillator(CLK_OSC_INTERNAL);
+	}
 	// Goto deep sleep mode
 	quark_deep_sleep();
+	if (osc == CLK_OSC_EXTERNAL) {
+		clk_set_oscillator(CLK_OSC_EXTERNAL);
+	}
 	// Platform restore
 	soc_resume();
 	resume_devices();

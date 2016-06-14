@@ -40,6 +40,7 @@
 #include "drivers/soc_comparator.h"
 #include "machine.h"
 #include "drivers/usb_acm.h"
+#include "drivers/clk_system.h"
 
 struct usb_pm_cb_list;
 
@@ -69,50 +70,12 @@ static void call_user_callback(void *item, void *param)
 
 #ifdef CONFIG_USB
 
-#define OSC_INTERNAL 1
-#define OSC_EXTERNAL 0
-#define INTERNAL_OSC_TRIM 0x240
-
 /* get_uptime_32k returns always-on counter value running off 32KHz RTC clock */
 static void delay_us(uint32_t us)
 {
 	int timeout = get_uptime_32k() + (us + 30) / 30;
 
 	while (get_uptime_32k() < timeout) ;
-}
-
-void set_oscillator(int internal)
-{
-	if (internal) {
-		/* Start internal oscillator (with trim) */
-		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1) |=
-			INTERNAL_OSC_TRIM << OSC0_CFG1_INTERNAL_OSC_TRIM_BIT |
-			OSC0_CFG1_INTERNAL_OSC_EN_MASK;
-		/* Wait internal oscillator ready */
-		while (!((MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE,
-						 SCSS_OSC0_STAT1) &
-			  OSC0_STAT1_LOCK_INTERNAL)))
-			;
-		/* Trim internal oscillator */
-		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1) =
-			INTERNAL_OSC_TRIM << OSC0_CFG1_INTERNAL_OSC_TRIM_BIT |
-			OSC0_CFG1_INTERNAL_OSC_EN_MASK;
-	} else {
-		/* Set clk to 32MHz, external oscillator, 5.5pF load */
-		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1) |=
-			OSC0_CFG1_XTAL_OSC_TRIM_5_55_PF |
-			OSC0_CFG1_XTAL_OSC_EN_MASK;
-		/* Wait internal regulator ready */
-		while (!((MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE,
-						 SCSS_OSC0_STAT1) &
-			  OSC0_STAT1_LOCK_XTAL)))
-			;
-		/* Switch to external oscillator */
-		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1) =
-			OSC0_CFG1_XTAL_OSC_TRIM_5_55_PF |
-			(OSC0_CFG1_XTAL_OSC_EN_MASK |
-			 OSC0_CFG1_XTAL_OSC_OUT_MASK);
-	}
 }
 
 void enable_vusb_regulator(struct usb_pm_info *usb_pm, bool enable)
@@ -151,7 +114,8 @@ static inline void usb_generic_callback(struct td_device *dev)
 
 #ifdef CONFIG_USB
 #ifdef CONFIG_QUARK_SE_SWITCH_INTERNAL_OSCILLATOR
-	set_oscillator(priv->is_plugged ? OSC_EXTERNAL : OSC_INTERNAL);
+	clk_set_oscillator(
+		priv->is_plugged ? CLK_OSC_EXTERNAL : CLK_OSC_INTERNAL);
 #endif
 	enable_vusb_regulator(priv, priv->is_plugged);
 #endif

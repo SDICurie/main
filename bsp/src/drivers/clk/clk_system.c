@@ -71,6 +71,49 @@ static int clk_system_driver_suspend(struct td_device *dev, PM_POWERSTATE state)
 	return 0;
 }
 
+enum oscillator clk_get_oscillator(void)
+{
+	uint32_t osc_cfg =
+		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1);
+
+	return (osc_cfg & OSC0_CFG1_XTAL_OSC_EN_MASK) ?
+	       CLK_OSC_EXTERNAL : CLK_OSC_INTERNAL;
+}
+
+#define INTERNAL_OSC_TRIM 0x240
+
+void clk_set_oscillator(enum oscillator oscillator)
+{
+	if (oscillator == CLK_OSC_INTERNAL) {
+		/* Start internal oscillator (with trim) */
+		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1) |=
+			INTERNAL_OSC_TRIM << OSC0_CFG1_INTERNAL_OSC_TRIM_BIT |
+			OSC0_CFG1_INTERNAL_OSC_EN_MASK;
+		/* Wait internal oscillator ready */
+		while (!((MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE,
+						 SCSS_OSC0_STAT1)
+			  & OSC0_STAT1_LOCK_INTERNAL))) ;
+		/* Trim internal oscillator */
+		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1) =
+			INTERNAL_OSC_TRIM << OSC0_CFG1_INTERNAL_OSC_TRIM_BIT |
+			OSC0_CFG1_INTERNAL_OSC_EN_MASK;
+	} else {
+		/* Set clk to 32MHz, external oscillator, 5.5pF load */
+		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1) |=
+			OSC0_CFG1_XTAL_OSC_TRIM_5_55_PF |
+			OSC0_CFG1_XTAL_OSC_EN_MASK;
+		/* Wait internal regulator ready */
+		while (!((MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE,
+						 SCSS_OSC0_STAT1)
+			  & OSC0_STAT1_LOCK_XTAL))) ;
+		/* Switch to external oscillator */
+		MMIO_REG_VAL_FROM_BASE(SCSS_REGISTER_BASE, SCSS_OSC0_CFG1) =
+			OSC0_CFG1_XTAL_OSC_TRIM_5_55_PF |
+			(OSC0_CFG1_XTAL_OSC_EN_MASK |
+			 OSC0_CFG1_XTAL_OSC_OUT_MASK);
+	}
+}
+
 struct driver clk_system_driver = {
 	.init = clk_system_driver_init,
 	.suspend = clk_system_driver_suspend,

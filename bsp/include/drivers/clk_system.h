@@ -36,9 +36,10 @@
 #define CLK_GATE_OFF (0)
 #define CLK_GATE_ON  (~CLK_GATE_OFF)
 
+
 /**
- * @defgroup clk_gate Clock Gating Driver
- * Clock Gate Driver API.
+ * @defgroup clk_gate Clock Management Driver
+ * Clock Management Driver API.
  *
  * <table>
  * <tr><th><b>Include file</b><td><tt> \#include "drivers/clk_system.h"</tt>
@@ -53,6 +54,17 @@
  * @ingroup soc_drivers
  * @{
  */
+
+/**
+ * Hybrid oscillator enum
+ *
+ */
+enum oscillator {
+	CLK_OSC_INTERNAL = 0, /*!< Internal silicon oscillator */
+	CLK_OSC_EXTERNAL, /*!< External XTAL oscillator */
+	CLK_OSC_LAST
+};
+
 
 /**
  *  Clock gating system driver.
@@ -74,6 +86,20 @@ struct clk_gate_info_s {
  *  @param  value           Desired state of clock gate
  */
 void set_clock_gate(struct clk_gate_info_s *clk_gate_info, uint32_t value);
+
+/**
+ * Configure current oscillator type
+ *
+ * @param oscillator The new oscillator to use
+ */
+void clk_set_oscillator(enum oscillator oscillator);
+
+/**
+ * Return currently configured oscillator
+ *
+ * @return The currently configured oscillator
+ */
+enum oscillator clk_get_oscillator(void);
 
 /** @} */
 
