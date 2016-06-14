@@ -43,7 +43,7 @@ $(OUT)/%.o: $(THIS_DIR)/%.c
 
 $(LIB): $(OBJS)
 	@echo $(ANSI_RED)"[AR]"$(ANSI_OFF) $@
-	$(AT)$(AR) rcs $@ $(OBJS)
+	$(AT)$(AR) rcsD $@ $(OBJS)
 
 clean:
 	@echo $(ANSI_RED)"[CLEAN]"$(ANSI_OFF) $@
