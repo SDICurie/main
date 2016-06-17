@@ -248,7 +248,9 @@ void sensor_delay_ms(uint32_t msecs)
 {
 	if (msecs >= CONVERT_TICKS_TO_MS(1)) {
 		T_SEMAPHORE sem = semaphore_create(0);
-		semaphore_take(sem, (int)msecs + 1); /* details in FIRE-5618 */
+/* Ensure that we will wait at least 'msecs' millisecond as if semaphore_take is called
+ * right before the timer tick interrupt it will be released immediately */
+		semaphore_take(sem, (int)msecs + 1);
 		semaphore_delete(sem);
 	} else {
 		wait_ticks(msecs * AON_CNT_TICK_PER_MS);
