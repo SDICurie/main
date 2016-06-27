@@ -61,7 +61,7 @@ typedef enum {
 	SENSOR_ABS_SIMPLEGES,
 	SENSOR_ABS_STEPCOUNTER,
 	SENSOR_ABS_ACTIVITY,
-	SENSOR_ABS_STEPCADENCE,
+	SENSOR_ABS_CADENCE,
 	SENSOR_ABS_OHRM,
 	SENSOR_ALGO_KB,
 	SENSOR_ALGO_DEMO,
@@ -95,7 +95,7 @@ typedef enum {
 #define SIMPLEGES_TYPE_MASK (1 << SENSOR_ABS_SIMPLEGES)
 #define STEPCOUNTER_TYPE_MASK   (1 << SENSOR_ABS_STEPCOUNTER)
 #define ACTIVITY_TYPE_MASK      (1 << SENSOR_ABS_ACTIVITY)
-#define STEPCADENCE_TYPE_MASK       (1 << SENSOR_ABS_STEPCADENCE)
+#define CADENCE_TYPE_MASK       (1 << SENSOR_ABS_CADENCE)
 #define OHRM_ABS_TYPE_MASK      (1 << SENSOR_ABS_OHRM)
 #define ALTITUDE_ABS_TYPE_MASK      (1 << SENSOR_ABS_ALTITUDE)
 #define ALGO_KB_MASK        (1 << SENSOR_ALGO_KB)
@@ -112,7 +112,7 @@ typedef enum {
 			     SIMPLEGES_TYPE_MASK |   \
 			     STEPCOUNTER_TYPE_MASK | \
 			     ACTIVITY_TYPE_MASK |    \
-			     STEPCADENCE_TYPE_MASK |	\
+			     CADENCE_TYPE_MASK |	\
 			     ALTITUDE_ABS_TYPE_MASK |	 \
 			     OHRM_ABS_TYPE_MASK |      \
 			     ALGO_KB_MASK |	 \
@@ -131,6 +131,18 @@ typedef enum {
 	BLE_HR_DATA = 0,
 } ss_data_type_t;
 
+
+/**
+ * activity type definition
+ */
+typedef enum {
+	NONACTIVITY = 0,
+	WALKING,
+	RUNNING,
+	BIKING,
+	SLEEPING,
+	CLIMBING,
+} ss_activity_type_t;
 /**
  * Unique data struct provide all kinds of sensor data
  */
@@ -190,35 +202,32 @@ struct simpleges_result {
 } __packed;
 
 /** Sensor data for SENSOR_ABS_STEPCOUNTER sensor
- * @param activity activity type
- *        - 0  no activity
- *        - 1  walking
- *        - 2  running
- *        - 3  biking
- *        - 4  sleeping
+ * @param steps - related to activity type
+ *        - for running/walking: steps
+ *        - for biking: pedal counts
+ *        - for climbing: stair counts
  */
 struct stepcounter_result {
-	uint32_t steps;  /*!< Cumulative step count */
-	uint32_t activity; /*!< Activity type, see table above */
+	uint32_t steps;  /*!< Cumulative step/stair/pedal count */
+	uint32_t activity; /*!< Activity type as in \ref ss_activity_type_t*/
 } __packed;
 
-/** Sensor data for SENSOR_ABS_ACTIVITY sensor
- * @param type activity type
- *        - 0  no activity
- *        - 1  walking
- *        - 2  running
- *        - 3  biking
- *        - 4  sleeping
+/**
+ * Sensor data for SENSOR_ABS_ACTIVITY sensor
  */
 struct activity_result {
-	uint32_t type;   /*!< Activity type, see table above */
+	uint32_t type;   /*!< Activity type as in \ref ss_activity_type_t*/
 } __packed;
 
 
 /** Sensor data for SENSOR_ABS_STEPCADENCE sensor
+ * @param cadence - related to activity type
+ *        - for running/walking/climbing: step cadence
+ *        - for biking: pedal cadence
  */
-struct stepcadence_result {
+struct cadence_result {
 	uint16_t cadence; /*!< Cadence currently detected */
+	uint16_t activity; /*!< Activity type as in \ref ss_activity_type_t*/
 } __packed;
 
 /**************************
