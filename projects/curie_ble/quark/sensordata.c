@@ -61,15 +61,18 @@ static void handle_sensor_subscribe_data(struct cfw_message *msg)
 	uint8_t sensor_type = GET_SENSOR_TYPE(p_evt->handle);
 
 	switch (sensor_type) {
-	case SENSOR_ABS_STEPCADENCE:;
-		struct stepcadence_result *p =
-			(struct stepcadence_result *)p_data_header->data;
+	case SENSOR_ABS_CADENCE:;
+		struct cadence_result *p =
+			(struct cadence_result *)p_data_header->data;
 		/* New value of step cadence sensor */
 		/* BLE RSC profile reports stride cadence whereas the sensor reports
 		 * step cadence => need to convert the sensor value before BLE notification:
 		 * 1 stride = 2 steps */
-		pr_info(LOG_MODULE_MAIN, "stride cadence=%d", p->cadence / 2);
-		ble_rscs_update(0, p->cadence / 2);
+		if (p->activity == WALKING || p->activity == RUNNING) {
+			pr_info(LOG_MODULE_MAIN, "stride cadence=%d",
+				p->cadence / 2);
+			ble_rscs_update(0, p->cadence / 2);
+		}
 		break;
 	}
 }
@@ -136,7 +139,7 @@ static void service_connection_cb(cfw_service_conn_t *conn, void *param)
 {
 	sensor_service_conn = conn;
 	/* Scan for sensor presence */
-	sensor_service_start_scanning(conn, NULL, STEPCADENCE_TYPE_MASK);
+	sensor_service_start_scanning(conn, NULL, CADENCE_TYPE_MASK);
 }
 
 void sensordata_init(T_QUEUE queue)

@@ -36,7 +36,7 @@
 #define MAX_CADENCE          512
 
 /* Structure used to report event */
-static struct stepcadence_result stepcadence_rpt_buf;
+static struct cadence_result stepcadence_rpt_buf;
 
 static uint16_t step_count = 0;
 static uint32_t local_time = 0;
@@ -87,10 +87,10 @@ static int stepcadence_algorithm_exec(void **sensor_data, feed_general_t *feed)
 		result = stepcadence_algorithm_process(accel_data);
 		if (result != -1) {
 			exposed_sensor_t *sensor = GetExposedStruct(
-				SENSOR_ABS_STEPCADENCE, DEFAULT_ID);
+				SENSOR_ABS_CADENCE, DEFAULT_ID);
 			if (sensor != NULL) {
-				struct stepcadence_result *value =
-					(struct stepcadence_result *)
+				struct cadence_result *value =
+					(struct cadence_result *)
 					sensor->rpt_data_buf;
 				value->cadence = result;
 				sensor->ready_flag = 1;
@@ -201,9 +201,9 @@ define_feedinit(stepcadence_algo);
  */
 static exposed_sensor_t stepcadence_exposed_sensor = {
 	.depend_flag = 1 << BASIC_ALGO_STEPCOUNTER,
-	.type = SENSOR_ABS_STEPCADENCE,
+	.type = SENSOR_ABS_CADENCE,
 	.id = DEFAULT_ID,
 	.rpt_data_buf = (void *)&stepcadence_rpt_buf,
-	.rpt_data_buf_len = sizeof(struct stepcadence_result),
+	.rpt_data_buf_len = sizeof(struct cadence_result),
 };
 define_exposedinit(stepcadence_exposed_sensor);
