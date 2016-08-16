@@ -148,6 +148,7 @@ endif
 # when other make goals are invoked
 SETUP_VARS += \
     PROJECT_PATH              \
+    INTERNAL_BSP_PATH         \
     PROJECT                   \
     BOARD                     \
     BUILDVARIANT              \

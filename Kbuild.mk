@@ -47,3 +47,9 @@ subdir-cflags-y += -I$(T)/bsp/include
 -include packages/*/package.mk
 -include packages/*/*/package.mk
 -include packages/*/*/*/package.mk
+
+# Optional internal BSP path
+ifdef INTERNAL_BSP_PATH
+obj-y += $(INTERNAL_BSP_PATH)/
+subdir-cflags-y += -I$(INTERNAL_BSP_PATH)/include
+endif

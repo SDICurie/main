@@ -48,6 +48,7 @@ endif
 
 export OUT
 export PROJECT_PATH
+export INTERNAL_BSP_PATH
 
 pub:
 	$(AT)mkdir -p $(PUB)

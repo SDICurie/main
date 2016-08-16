@@ -65,3 +65,9 @@ config GPIO_DRIVER_TESTS
 	bool "GPIO driver tests"
 
 endmenu
+
+config INTERNAL_BSP_PATH
+    string
+    option env="INTERNAL_BSP_PATH"
+
+-source "$INTERNAL_BSP_PATH/Kconfig"
