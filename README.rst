@@ -4,7 +4,9 @@ SDI version of Intel® Curie BSP
 This Curie BSP is the forked version of Intel Curie BSP plus some add-on features from Intel Smart Device Innovations team. 
 More introduction to the original Intel BSP is here: https://github.com/CurieBSP/main/blob/master/README.rst.
 
-This Curie BSP doesn't intend to replace the original Intel BSP. The reason to keep this one is to make it possible and flexible to add some additional features for some customized projects while still keeping the original BSP as much as possible. 
+This Curie BSP doesn't intend to replace the original Intel BSP. The reason to keep this one is to make it possible 
+and flexible to add some additional features for some customized projects while still keeping the original BSP 
+as much as possible. 
 
 ONE TIME SETUP
 **************
