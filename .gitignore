@@ -10,6 +10,7 @@ packages/intel
 packages/intel/emulator
 packages/mathlib
 packages/soc_drivers
+packages/external
 bsp/bootable/bootloader
 external/toolchain
 external/gcc-arc-elf32
@@ -33,4 +34,3 @@ external/go
 external/go-packages/src/github.com/paypal/gatt
 external/pyserial
 external/pycrypto
-sdi
