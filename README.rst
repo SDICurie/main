@@ -17,7 +17,9 @@ all the needed repositories.
 Setup repo:
 
 ``mkdir ~/bin``
+
 ``wget http://commondatastorage.googleapis.com/git-repo-downloads/repo -O ~/bin/repo``
+
 ``chmod a+x ~/bin/repo``
 
 In ~/.bashrc add:
