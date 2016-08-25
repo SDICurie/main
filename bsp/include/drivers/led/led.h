@@ -54,6 +54,7 @@
  */
 
 #define LED_FIXED_INFINITE_DURATION 0
+#define LED_REPETITION_CONTINUOUS 255
 
 /**
  * Led type defines the pattern to perform.
@@ -98,7 +99,8 @@ typedef struct {
 typedef struct led_s {
 	uint8_t id;                             /**< LED number */
 	uint8_t repetition_count;               /**< Number of times the pattern is repeted.
-	                                         * Put 0 to play pattern only once */
+	                                         * Put 0 to play pattern only once.
+	                                         * Put LED_REPETITION_CONTINUOUS for continuous mode */
 	uint8_t intensity;                      /**< Light intensity. Put 0 for minimum intensity,
 	                                         * 255 for maximum intensity */
 	duration_t duration[3];                 /**< Duration in ms for each blink */

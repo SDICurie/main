@@ -225,9 +225,11 @@ static void led_timer_callback(void *data)
 		return;
 	}
 	if(led->repetition_remaining) {
-		led->repetition_remaining--;
-		if(!(led->repetition_remaining))
-			led_handler.pattern_duration = led_handler.pattern_last_duration;
+		if (led->repetition_remaining != LED_REPETITION_CONTINUOUS) {
+			led->repetition_remaining--;
+			if(!(led->repetition_remaining))
+				led_handler.pattern_duration = led_handler.pattern_last_duration;
+		}
 		/* execute the pattern again */
 		timer_start(led->timer, led_handler.pattern_duration, NULL);
 		led_lp5562_start(led->dev, LED_EN1_RUN_MASK|LED_EN2_RUN_MASK|LED_EN3_RUN_MASK);
@@ -575,6 +577,13 @@ int8_t led_pattern_handler_config(enum led_type type, led_s *pattern,
 		led_lp5562_enable(led_handler.dev, false);
 		return -1;
 	}
+
+    /* If we are going into continuous mode, call the callback right away */
+    if ((led_handler.repetition_remaining == LED_REPETITION_CONTINUOUS) &&
+            (led_handler.callback)) {
+        led_handler.callback(0, 0);
+    }
+
 	return 0;
 }
 

@@ -92,6 +92,7 @@ static struct cfw_message *ui_led_reqs[UI_LED_COUNT] = { NULL };
 static rgb_t ui_led_default_color[UI_LED_COUNT];
 #endif
 static bool ui_led_is_default_color[UI_LED_COUNT] = { false };
+static bool ui_led_is_continuous_mode[UI_LED_COUNT] = { false };
 static volatile uint8_t ui_led_state[UI_LED_COUNT];
 static struct cfw_message *ui_led_queue[UI_LED_COUNT] = { NULL };
 #endif
@@ -478,7 +479,7 @@ void ui_play_led(struct cfw_message *msg)
 	/* check pattern content */
 	if ((led_req->type == LED_WAVE_X1 &&
 	     led_req->pattern.duration[0].duration_on == 0) ||
-	    ((led_req->type == LED_BLINK_X1 || led_req->type == LED_WAVE_X1) &&
+	    ((led_req->type == LED_WAVE_X1) &&
 	     (led_req->pattern.duration[0].duration_off == 0 &&
 	      led_req->pattern.repetition_count > 1)) ||
 	    ((led_req->type == LED_BLINK_X2 || led_req->type == LED_WAVE_X2) &&
@@ -584,6 +585,9 @@ void ui_play_led(struct cfw_message *msg)
 
 	ui_led_state[led_req->led_id] = UI_LED_PLAYING;
 
+	ui_led_is_continuous_mode[led_req->led_id] =
+		(led_req->pattern.repetition_count == LED_REPETITION_CONTINUOUS);
+
 	/* Transmit to LED driver */
 	status = led_pattern_handler_config(led_req->type,
 					    &led_req->pattern, led_req->led_id);
@@ -678,7 +682,9 @@ void ui_play_led_callback(uint8_t led_id, uint8_t result)
 	 * the highest priority regarding the UI LED */
 	if (ui_led_state[led_id] == UI_LED_PLAYING) {
 		/* LED pattern is done, goto idle state */
-		ui_led_state[led_id] = UI_LED_DONE;
+		if (!ui_led_is_continuous_mode[led_id]) {
+			ui_led_state[led_id] = UI_LED_DONE;
+		}
 
 		struct ui_led_evt *evt =
 			(struct ui_led_evt *)message_alloc(sizeof(*evt), NULL);
