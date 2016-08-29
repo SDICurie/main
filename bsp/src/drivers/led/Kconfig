@@ -47,4 +47,16 @@ choice
        bool "SMLP34"
 endchoice
 
+choice
+    depends on LP5562_LED
+    prompt "LP5562 I2C bus selection"
+    default LP5562_ON_I2C1
+
+    config LP5562_ON_I2C0
+    bool "LP5562 on I2C0"
+
+    config LP5562_ON_I2C1
+    bool "LP5562 on I2C1"
+endchoice
+
 endmenu

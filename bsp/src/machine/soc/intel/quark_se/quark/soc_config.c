@@ -199,7 +199,12 @@ struct sba_device pf_sba_device_nfc = {
 struct sba_device pf_sba_device_led_lp5562 = {
 	.dev.id = LED_LP5562_ID,
 	.dev.driver = &led_lp5562_driver,
+#ifdef CONFIG_LP5562_ON_I2C0
+	.parent = &pf_bus_sba_i2c_0,
+#endif
+#ifdef CONFIG_LP5562_ON_I2C1
 	.parent = &pf_bus_sba_i2c_1,
+#endif
 	.dev.priv = &(struct lp5562_info) {
 #ifdef CONFIG_LP5562_LED_ENABLE
 		.led_en_dev = &pf_device_soc_gpio_32,
