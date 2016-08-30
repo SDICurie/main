@@ -232,6 +232,7 @@ typedef enum {
 	SPI_OHRM_ID = 41,
 	MANAGED_COMPARATOR_ID = 42,
 	BATT_CHARGER_ID = 43,
+	MAXIMUM_SOC_DEVICE_ID /* Always keep at bottom of list */
 } DEVICE_ID;
 
 /* SBA_SPI0_ID */
