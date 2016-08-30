@@ -118,6 +118,28 @@ void init_devices(struct td_device **all_devices, uint32_t all_devices_count);
  */
 void init_all_devices(void);
 
+/**
+ * Adds extended board devices to power management infrastructure and init them.
+ *
+ * @param board_devices pointer to the extended board devices array
+ * @param boord_devices_count size of the board_devices array
+ *
+ * @attention It will panic if there is an error during initialization.
+ */
+void init_board_devices(struct td_device **	board_devices,
+			uint32_t		board_devices_count);
+
+/**
+ * Initializes extended board devices.
+ *
+ * This function shall be implemented externally for a specific board. It must call the
+ * init_board_devices() function and pass the device tree for the board.
+ *
+ * @attention It will panic if there is an error during initialization. The function is
+ * optional and not necessarily implemented by all devices.
+ */
+void init_extended_devices(void);
+
 
 /** @} */
 

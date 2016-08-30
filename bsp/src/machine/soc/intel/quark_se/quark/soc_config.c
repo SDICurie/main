@@ -63,11 +63,6 @@
 
 #define SPI_FLASH_CS (0x1 << (CONFIG_SPI_FLASH_SLAVE_CS - 1))
 
-#ifdef CONFIG_CC1200
-#define CC1200_ID (MAXIMUM_SOC_DEVICE_ID + 10)
-#define CC1200_BUS_ADDR SPI_SE_1
-#endif
-
 /* Configuration of sba master devices (bus) */
 static struct sba_master_cfg_data qrk_sba_spi_0_cfg = {
 	.bus_id = SBA_SPI_MASTER_0,
@@ -91,7 +86,7 @@ static struct sba_master_cfg_data qrk_sba_spi_1_cfg = {
 	.config.spi_config = {
 #ifdef CONFIG_CC1200
 		.speed = 1000,                                   /*!< SPI bus speed in KHz   */
-		.slave_enable = CC1200_BUS_ADDR,                 /*!< Slave Enable for CC1200 radio */
+		.slave_enable = SPI_SE_1,                       /*!< Slave Enable for CC1200 radio */
 #else
 		.speed = 250,                                   /*!< SPI bus speed in KHz   */
 		.slave_enable = SPI_SE_3,                       /*!< Slave Enable, NFC device */
@@ -118,16 +113,6 @@ struct td_device pf_bus_sba_spi_1 = {
 	.driver = &serial_bus_access_driver,
 	.priv = &qrk_sba_spi_1_cfg
 };
-
-#ifdef CONFIG_CC1200
-extern struct driver cc1200_driver;
-struct sba_device pf_sba_device_cc1200 = {
-	.parent = &pf_bus_sba_spi_1,
-	.dev.id = CC1200_ID,
-	.dev.driver = &cc1200_driver,
-	.addr.cs = CC1200_BUS_ADDR
-};
-#endif
 
 #endif /* CONFIG_INTEL_QRK_SPI */
 
@@ -487,9 +472,6 @@ static struct td_device *qrk_platform_devices[] = {
 	(struct td_device *)&pf_sba_device_flash_spi0,
 #endif
 	&pf_bus_sba_spi_1, // SPI 1 bus and devices
-#ifdef CONFIG_CC1200
-	(struct td_device *)&pf_sba_device_cc1200,
-#endif
 #endif
 
 #ifdef CONFIG_SOC_COMPARATOR
@@ -520,10 +502,20 @@ static struct td_device *qrk_platform_devices[] = {
 #endif
 };
 
+__weak void init_extended_devices(void)
+{
+	/* This function shall be reimplemented by
+	 *  the BSP for a specific board.
+	 */
+}
+
 void init_all_devices(void)
 {
 	/* Init plateform devices and buses */
 	init_devices(qrk_platform_devices, ARRAY_SIZE(qrk_platform_devices));
+
+	/* Init extended devices from a specific board */
+	init_extended_devices();
 
 #ifdef CONFIG_DRV2605
 	/* TODO: This code should be deleted when drv2605 will be fully

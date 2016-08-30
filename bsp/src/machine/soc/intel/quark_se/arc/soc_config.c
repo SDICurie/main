@@ -442,8 +442,18 @@ static struct td_device *arc_platform_devices[] = {
 #endif
 };
 
-void init_all_devices()
+__weak void init_extended_devices(void)
 {
-	// Init plateform devices and buses
+	/* This function shall be reimplemented by
+	 *  the BSP for a specific board.
+	 */
+}
+
+void init_all_devices(void)
+{
+	/* Init plateform devices and buses */
 	init_devices(arc_platform_devices, ARRAY_SIZE(arc_platform_devices));
+
+	/* Init extended devices from a specific board */
+	init_extended_devices();
 }
