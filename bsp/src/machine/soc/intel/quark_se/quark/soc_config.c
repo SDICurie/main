@@ -63,6 +63,11 @@
 
 #define SPI_FLASH_CS (0x1 << (CONFIG_SPI_FLASH_SLAVE_CS - 1))
 
+#ifdef CONFIG_CC1200
+#define CC1200_ID (MAXIMUM_SOC_DEVICE_ID + 10)
+#define CC1200_BUS_ADDR SPI_SE_1
+#endif
+
 /* Configuration of sba master devices (bus) */
 static struct sba_master_cfg_data qrk_sba_spi_0_cfg = {
 	.bus_id = SBA_SPI_MASTER_0,
@@ -84,10 +89,15 @@ static struct sba_master_cfg_data qrk_sba_spi_0_cfg = {
 static struct sba_master_cfg_data qrk_sba_spi_1_cfg = {
 	.bus_id = SBA_SPI_MASTER_1,
 	.config.spi_config = {
+#ifdef CONFIG_CC1200
+		.speed = 1000,                                   /*!< SPI bus speed in KHz   */
+		.slave_enable = CC1200_BUS_ADDR,                 /*!< Slave Enable for CC1200 radio */
+#else
 		.speed = 250,                                   /*!< SPI bus speed in KHz   */
+		.slave_enable = SPI_SE_3,                       /*!< Slave Enable, NFC device */
+#endif
 		.txfr_mode = SPI_TX_RX,                         /*!< Transfer mode */
 		.data_frame_size = SPI_8_BIT,                   /*!< Data Frame Size ( 4 - 16 bits ) */
-		.slave_enable = SPI_SE_3,                       /*!< Slave Enable, NFC device */
 		.bus_mode = SPI_BUSMODE_0,                      /*!< SPI bus mode is 0 by default */
 		.spi_mode_type = SPI_MASTER,                    /*!< SPI 0 is in master mode */
 		.loopback_enable = 0                            /*!< Loopback disabled by default */
@@ -108,6 +118,17 @@ struct td_device pf_bus_sba_spi_1 = {
 	.driver = &serial_bus_access_driver,
 	.priv = &qrk_sba_spi_1_cfg
 };
+
+#ifdef CONFIG_CC1200
+extern struct driver cc1200_driver;
+struct sba_device pf_sba_device_cc1200 = {
+	.parent = &pf_bus_sba_spi_1,
+	.dev.id = CC1200_ID,
+	.dev.driver = &cc1200_driver,
+	.addr.cs = CC1200_BUS_ADDR
+};
+#endif
+
 #endif /* CONFIG_INTEL_QRK_SPI */
 
 #ifdef CONFIG_INTEL_QRK_I2C
@@ -466,6 +487,9 @@ static struct td_device *qrk_platform_devices[] = {
 	(struct td_device *)&pf_sba_device_flash_spi0,
 #endif
 	&pf_bus_sba_spi_1, // SPI 1 bus and devices
+#ifdef CONFIG_CC1200
+	(struct td_device *)&pf_sba_device_cc1200,
+#endif
 #endif
 
 #ifdef CONFIG_SOC_COMPARATOR
