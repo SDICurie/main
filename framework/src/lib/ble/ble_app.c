@@ -130,6 +130,11 @@ struct ble_app_prop_rd_msg {
 static void ble_app_delete_conn_timer(void);
 
 /*
+ * External functions declaration
+ */
+extern void ble_gap_set_tx_power(int8_t tx_power);
+
+/*
  * Functions definition
  */
 int ble_app_conn_update(const struct bt_le_conn_param *p_params)
