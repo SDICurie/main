@@ -197,4 +197,22 @@ config DEEPSLEEP
 endmenu
 endif
 
+if INTEL_QRK_SPI
+menu "Intel Quark SPI1 Config"
+config SPI_1_SPEED
+	int "SPI1 bus speed"
+	range 0 10000
+	default 250
+
+config SPI_1_CS
+	hex "SPI1 chip selection"
+	default 0x04
+
+config SPI_1_BUS_MODE
+        hex "SPI1 bus mode"
+        default 0x0
+
+endmenu
+endif
+
 endmenu
