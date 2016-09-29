@@ -269,20 +269,27 @@ void queue_send_message(T_QUEUE queue, T_QUEUE_MESSAGE message,
 	OS_ERR_TYPE _err;
 	queue_impl_t *q = (queue_impl_t *)queue;
 
-	/* check input parameters */
-	if (queue_used(q) && q->sema != NULL) {
-		uint32_t it_mask = irq_lock();
-		_err = add_data(q, message, false);
-		irq_unlock(it_mask);
+	/* check queue size */
+	if (q->current_size < q->max_size) {
+		/* check input parameters */
+		if (queue_used(q) && q->sema != NULL) {
+			uint32_t it_mask = irq_lock();
+			_err = add_data(q, message, false);
+			irq_unlock(it_mask);
 
-		if (_err == E_OS_OK) {
-			semaphore_give(q->sema, &_err); // signal new message in the queue to the listener.
-			error_management(err, E_OS_OK);
-		} else {
-			error_management(err, _err);
+			if (_err == E_OS_OK) {
+				semaphore_give(q->sema, &_err); // signal new message in the queue to the listener.
+				error_management(err, E_OS_OK);
+			} else {
+				error_management(err, _err);
+			}
+		} else { /* param invalid */
+			error_management(err, E_OS_ERR);
 		}
-	} else { /* param invalid */
-		error_management(err, E_OS_ERR);
+	} else {
+		if (NULL != err) {
+			*err = E_OS_ERR_BUSY;
+		}
 	}
 	return;
 }

@@ -197,4 +197,8 @@ config DEEPSLEEP
 endmenu
 endif
 
+config MAIN_TASK_QUEUE_SIZE
+    int "Main queue size"
+    default 32
+
 endmenu

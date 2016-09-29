@@ -20,6 +20,18 @@ config STORAGE_TASK
 	The storage task is a low priority task dedicated to the asynchronous
 	handling of blocking flash operations.
 
+if STORAGE_TASK
+
+config  STORAGE_TASK_STACK_SIZE
+    int "Stack size of storage task"
+    default 2048
+
+config STORAGE_TASK_QUEUE_SIZE
+    int "Storage task queue size"
+    default 10
+
+endif
+
 config AUTO_SERVICE_INIT
 	bool "Activate the auto initialization of enabled services"
 

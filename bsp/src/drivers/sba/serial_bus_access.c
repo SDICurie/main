@@ -236,7 +236,9 @@ static void sba_generic_callback(uint32_t bus_id, int8_t status)
 	sba_dev = (struct sba_master_cfg_data *)dev->priv;
 
 	if ((sba_dev->current_request) == NULL) {
-		panic(E_OS_ERR_UNKNOWN); // Panic because we should never reach this point.
+		pr_error(LOG_MODULE_DRV,
+			 "Igonore sba_dev->current_request = NULL error!");
+		return; //panic(E_OS_ERR_UNKNOWN); // Panic because we should never reach this point.
 	} else {
 		sba_dev->current_request->status = status;
 		if (NULL != sba_dev->current_request->callback) {

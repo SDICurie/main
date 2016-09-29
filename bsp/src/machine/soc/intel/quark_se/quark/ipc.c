@@ -36,7 +36,7 @@
 T_QUEUE ipc_setup(void)
 {
 	/* Framework initializations */
-	T_QUEUE queue = queue_create(32);
+	T_QUEUE queue = queue_create(CONFIG_MAIN_TASK_QUEUE_SIZE);
 
 	assert(queue);
 

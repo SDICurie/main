@@ -37,14 +37,14 @@
 #include "services/services_ids.h"
 
 /* Definition of the private task "TASK_STORAGE" */
-DEFINE_TASK(TASK_STORAGE, 7, storage_task, 2048, 0);
+DEFINE_TASK(TASK_STORAGE, 7, storage_task, CONFIG_STORAGE_TASK_STACK_SIZE, 0);
 
 static T_QUEUE storage_queue;
 
 /* Storage initialisation */
 void init_storage(void)
 {
-	storage_queue = queue_create(10);
+	storage_queue = queue_create(CONFIG_STORAGE_TASK_QUEUE_SIZE);
 	assert(storage_queue);
 
 #ifdef CONFIG_SERVICES_QUARK_SE_LL_STORAGE_IMPL

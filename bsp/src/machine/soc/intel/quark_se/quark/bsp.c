@@ -54,7 +54,7 @@ T_QUEUE bsp_init(void)
 	/* Setup IPC and main queue */
 	T_QUEUE queue = ipc_setup();
 #else
-	T_QUEUE queue = queue_create(32, NULL);
+	T_QUEUE queue = queue_create(CONFIG_MAIN_TASK_QUEUE_SIZE, NULL);
 	assert(queue);
 #endif
 
