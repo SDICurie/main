@@ -250,6 +250,11 @@ int usb_ep_write(int ep_address, uint8_t *buf, int len, void *priv)
 	return usb_driver_intf->usb_ep_write(ep_address, buf, len, priv);
 }
 
+int usb_ep_stall(int ep_address, int len, void *priv)
+{
+	return usb_driver_intf->usb_ep_stall(ep_address, len, priv);
+}
+
 int usb_get_config()
 {
 	return usb_driver_intf->usb_get_config();
