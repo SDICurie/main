@@ -163,7 +163,7 @@ comment "QUARK core deepsleep requires the Intel AON PT driver"
 	depends on !INTEL_QRK_AON_PT
 
 config SPI_FLASH_SLAVE_CS
-	int
+	int "SPI flash chip selection pin"
 	range 1 4
 	default 3
 

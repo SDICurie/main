@@ -37,6 +37,11 @@ config SPI_FLASH_MX25U1635E
 	depends on INTEL_QRK_SPI
 	select SPI_FLASH_MX25
 
+config SPI_FLASH_MX25R6435F
+	bool "SPI NOR Flash Macronix MX25U6435F on Intel QRK"
+	depends on INTEL_QRK_SPI
+	select SPI_FLASH_MX25
+
 comment "SPI Flash drivers require the Intel SPI bus driver"
 	depends on !INTEL_QRK_SPI
 
