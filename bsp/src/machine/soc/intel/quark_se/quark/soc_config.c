@@ -84,16 +84,11 @@ static struct sba_master_cfg_data qrk_sba_spi_0_cfg = {
 static struct sba_master_cfg_data qrk_sba_spi_1_cfg = {
 	.bus_id = SBA_SPI_MASTER_1,
 	.config.spi_config = {
-#ifdef CONFIG_CC1200
-		.speed = 1000,                                   /*!< SPI bus speed in KHz   */
-		.slave_enable = SPI_SE_1,                       /*!< Slave Enable for CC1200 radio */
-#else
-		.speed = 250,                                   /*!< SPI bus speed in KHz   */
-		.slave_enable = SPI_SE_3,                       /*!< Slave Enable, NFC device */
-#endif
+		.speed = CONFIG_SPI_1_SPEED,
+		.slave_enable = CONFIG_SPI_1_CS,
+		.bus_mode = CONFIG_SPI_1_BUS_MODE,              /*!< SPI bus mode */
 		.txfr_mode = SPI_TX_RX,                         /*!< Transfer mode */
 		.data_frame_size = SPI_8_BIT,                   /*!< Data Frame Size ( 4 - 16 bits ) */
-		.bus_mode = SPI_BUSMODE_0,                      /*!< SPI bus mode is 0 by default */
 		.spi_mode_type = SPI_MASTER,                    /*!< SPI 0 is in master mode */
 		.loopback_enable = 0                            /*!< Loopback disabled by default */
 	},
@@ -177,8 +172,6 @@ struct sba_device pf_sba_device_flash_spi0 = {
 
 #endif /* CONFIG_INTEL_QRK_SPI */
 
-
-
 #ifdef CONFIG_NFC_STN54
 struct sba_device pf_sba_device_nfc = {
 	.dev.id = NFC_STN54_ID,
@@ -246,7 +239,6 @@ struct sba_device pf_sba_device_apds9190 = {
 	.addr.slave_addr = 0x39,
 };
 #endif
-
 
 /* List of devices */
 
@@ -421,7 +413,6 @@ struct td_device pf_device_pwm = {
 	},
 };
 #endif
-
 
 /* List of QRK platform devices (on die memory, spi slave etc ...) */
 
