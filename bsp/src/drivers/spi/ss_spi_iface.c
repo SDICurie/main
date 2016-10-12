@@ -223,6 +223,11 @@ DRIVER_API_RC ss_spi_set_config(SPI_CONTROLLER	controller_id,
 	return DRV_RC_OK;
 }
 
+spi_cfg_data_t *ss_spi_get_config(SPI_CONTROLLER controller_id)
+{
+	return &drv_config[controller_id].cfg;
+}
+
 DRIVER_API_RC ss_spi_deconfig(struct sba_master_cfg_data *sba_dev)
 {
 	spi_info_pt dev = 0;

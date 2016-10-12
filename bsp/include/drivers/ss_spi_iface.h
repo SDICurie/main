@@ -86,14 +86,11 @@ DRIVER_API_RC ss_spi_set_config(SPI_CONTROLLER	controller_id,
  *  Retrieve configuration of specified SPI controller.
  *
  *  @param   controller_id   SPI controller identifier
- *  @param   config          Pointer to configuration structure where to store current setup
  *
  *  @return
- *           - DRV_RC_OK   - On success
- *           - DRV_RC_FAIL - Otherwise
+ *           -config         Pointer of configuration structure where the current setup is stored
  */
-DRIVER_API_RC ss_spi_get_config(SPI_CONTROLLER	controller_id,
-				spi_cfg_data_t *config);
+spi_cfg_data_t *ss_spi_get_config(SPI_CONTROLLER controller_id);
 
 /**
  *  Place SPI controller into a disabled and default state (as if hardware reset occurred).

@@ -102,6 +102,7 @@ typedef struct sba_request {
 		uint32_t slave_addr;                /*!< Address of the I2C slave */
 	} addr;
 	SBA_BUSID bus_id;                           /*!< Controller ID */
+	SPI_BUS_MODE spi_bus_mode;              /*!< SPI Bus Mode selection*/
 	int8_t status;                              /*!< 0 if ok, -1 if error */
 	void *priv_data;                            /*!< User private data */
 	void (*callback)(struct sba_request *);     /*!< Callback to notify transaction completion */

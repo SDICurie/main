@@ -59,6 +59,12 @@
 #define     SPIM0_CS_3_GPIO26           (26)
 #define     SPIM0_CS_4_GPIO27           (27)
 
+/* Chip-Select and GPIO lookup for SPI1_MASTER */
+#define     SPIM1_CS_1_GPIO11           (11)
+#define     SPIM1_CS_2_GPIO12           (12)
+#define     SPIM1_CS_3_GPIO13           (13)
+#define     SPIM1_CS_4_GPIO14           (14)
+
 /* SoC SPI device register offsets  */
 #define     CTRL0                       (0x00)              /* SoC SPI Control Register 1 */
 #define     CTRL1                       (0x04)              /* SoC SPI Control Register 2 */

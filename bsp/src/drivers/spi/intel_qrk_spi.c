@@ -237,12 +237,9 @@ DRIVER_API_RC soc_spi_set_config(SOC_SPI_CONTROLLER	controller_id,
 	return DRV_RC_OK;
 }
 
-DRIVER_API_RC soc_spi_get_config(SOC_SPI_CONTROLLER	controller_id,
-				 spi_cfg_data_t *	config)
+spi_cfg_data_t *soc_spi_get_config(SOC_SPI_CONTROLLER	controller_id)
 {
-	// TODO - Check for no config structure
-	config = &drv_config[controller_id].cfg;
-	return DRV_RC_OK;
+	return &drv_config[controller_id].cfg;
 }
 
 DRIVER_API_RC soc_spi_deconfig(struct sba_master_cfg_data *sba_dev)
@@ -327,6 +324,39 @@ DRIVER_API_RC soc_spi_cs_hook(soc_spi_info_pt dev, int slave)
 		cs_config(dev->cs_gpio);
 		cs_low(dev->cs_gpio);
 	}
+
+    /* If SPI_M1, use GPIO mode */
+    else if (dev->instID == SOC_SPI_MASTER_1) {
+        switch (slave) {
+        case SPI_SE_1:
+        {
+            dev->cs_gpio = SPIM1_CS_1_GPIO11;
+            break;
+        }
+        case SPI_SE_2:
+        {
+            dev->cs_gpio = SPIM1_CS_2_GPIO12;
+            break;
+        }
+        case SPI_SE_3:
+        {
+            dev->cs_gpio = SPIM1_CS_3_GPIO13;
+            break;
+        }
+        case SPI_SE_4:
+        {
+            dev->cs_gpio = SPIM1_CS_4_GPIO14;
+            break;
+        }
+        default:
+        {
+            return DRV_RC_INVALID_OPERATION;
+        }
+        }
+        cs_config(dev->cs_gpio);
+        cs_low(dev->cs_gpio);
+    }
+
 	return DRV_RC_OK;
 }
 #endif
@@ -449,7 +479,9 @@ void transfer_complete(soc_spi_info_pt dev)
 #ifdef QRK_HW_V1
 	if (dev->instID == SOC_SPI_MASTER_0) {
 		cs_high(dev->cs_gpio);
-	}
+	} else if (dev->instID == SOC_SPI_MASTER_1) {
+        cs_high(dev->cs_gpio);
+    }
 #endif
 	if (dev->xfer_cb != NULL) {
 		dev->xfer_cb(dev->cb_xfer_data);
