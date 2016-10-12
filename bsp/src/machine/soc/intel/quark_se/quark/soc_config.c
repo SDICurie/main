@@ -166,7 +166,10 @@ struct sba_device pf_sba_device_flash_spi0 = {
 	.dev.driver = (struct driver *)&spi_flash_mx25u12835f_driver,
 #elif defined(CONFIG_SPI_FLASH_MX25R1635F)
 	.dev.driver = (struct driver *)&spi_flash_mx25r1635f_driver,
+#elif defined(CONFIG_SPI_FLASH_MX25R6435F)
+	.dev.driver = (struct driver *)&spi_flash_mx25r6435f_driver,
 #endif
+
 	.parent = &pf_bus_sba_spi_0,
 	.addr.cs = SPI_FLASH_CS
 };

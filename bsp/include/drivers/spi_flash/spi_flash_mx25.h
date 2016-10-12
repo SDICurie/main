@@ -37,5 +37,6 @@
 extern const struct spi_flash_driver spi_flash_mx25u12835f_driver;
 extern const struct spi_flash_driver spi_flash_mx25r1635f_driver;
 extern const struct spi_flash_driver spi_flash_mx25u1635e_driver;
+extern const struct spi_flash_driver spi_flash_mx25r6435f_driver;
 
 #endif
