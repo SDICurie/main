@@ -1,0 +1,44 @@
+Overview:
+-------------------------------------------------------------------------
+curie_hello project has the following functionality implemented using xloop:
+--Printing Hello ARC and Quark and Watchdog Keepalive is implemented using the xloop_post_func_periodic.
+--GPIO embedded LED blinks whose frequency depends on ADC value.
+
+It implements a standard usage of the framework.
+
+--------------------------------------------------------------------------------------
+To Read the ADC Value
+--------------------------------------------------------------------------------------
+***********Put a flying wire between the AD0(J14) to 3.3V(J10)or GND (J10)************
+
+--------------------------------------------------------------------------------------
+Expected behavior
+--------------------------------------------------------------------------------------
+The frequency of the LED blink depends on the ADC read value:
+AD0 is connected to GND: ADC value is greater than 0 and less than 700, LED blinks for every 1 sec.
+AD0 is connected to 3.3V:If the ADC value is greater than 3800, LED blinks for every 500ms.
+AD0 is floating:If the ADC value is in between 700 and 3800,LED blinks for every 2 sec.
+
+On the Console, Hello QUARK, Hello ARC and adc_value are printed out
+
+--------------------------------------------------------------------------------------
+How to Compile the Hello project
+--------------------------------------------------------------------------------------
+The project is built 'out of tree'. First a build folder needs to be created (anywhere in the file-system).
+Better not to create this folder inside source tree.
+
+	mkdir out
+	cd out
+	make -f PATH_TO/wearable_device_sw/projects/curie_hello/Makefile setup
+	make package
+
+This produces a ZIP file that will be used for flashing the board. By default,
+this file is located under "pub" in the OUT folder created above:
+
+	PATH_TO_OUT_FOLDER/pub/device/curie_hello/image/curie_101/release/
+
+The default location can be overwritten by specifying the desired PUB path to
+the "make package" command:
+
+	make package PUB="/path/to/your/pub/folder"
+
