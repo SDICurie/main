@@ -21,3 +21,4 @@ obj-$(CONFIG_CONSOLE_BACKEND_FLASH)     += console_backend_flash.o
 obj-$(CONFIG_INTEL_QRK_WDT) += wdt_helper.o
 cflags-$(CONFIG_PROFILING) += -finstrument-functions -finstrument-functions-exclude-file-list=wdt_helper.c
 obj-y += xloop.o
+obj-$(CONFIG_PARTITIONS) += partition.o
