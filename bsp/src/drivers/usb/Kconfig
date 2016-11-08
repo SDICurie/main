@@ -10,6 +10,16 @@ config USB_SHARED_INTERFACE
 	bool
 	depends on QUARK_SE && HAS_USB
 
+config USB_MSC_DEVICE_NAME
+	string "USB MSC device name"
+	default "CurieMSC"
+	depends on USB_MSC
+
+config USB_MSC_WRITE_PROTECTED
+	bool "USB MSC Write Protected Mode"
+	default y
+	depends on USB_MSC
+
 config USB_PRODUCT_ID
 	hex "USB Product ID"
 	default 0x0a9a
@@ -31,6 +41,11 @@ config USB_TEST_FUNCTION_DRIVER
 
 config USB_ACM
 	bool "ACM"
+	select USB
+	select WORKQUEUE
+
+config USB_MSC
+	bool "MSC"
 	select USB
 	select WORKQUEUE
 
